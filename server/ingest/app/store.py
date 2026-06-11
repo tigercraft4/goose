@@ -14,6 +14,44 @@ def ensure_device(conn: psycopg.Connection, device_id: str, mac: str | None = No
     )
 
 
+def insert_raw_frames(conn: psycopg.Connection, device_id: str, frames: list[dict]) -> int:
+    inserted = 0
+    with conn.cursor() as cur:
+        for frame in frames:
+            cur.execute(
+                """INSERT INTO raw_frames
+                   (device_id, captured_at, frame_hex, source, device_type,
+                    device_model, sensitivity)
+                   VALUES (%s, to_timestamp(%s), %s, %s, %s, %s, %s)
+                   ON CONFLICT (device_id, captured_at, frame_hex) DO NOTHING""",
+                (
+                    device_id,
+                    frame["captured_at_unix"],
+                    frame["frame_hex"].lower(),
+                    frame.get("source"),
+                    frame.get("device_type"),
+                    frame.get("device_model"),
+                    frame.get("sensitivity"),
+                ),
+            )
+            inserted += cur.rowcount
+    return inserted
+
+
+def set_device_display_name(
+    conn: psycopg.Connection,
+    device_id: str,
+    display_name: str,
+) -> tuple | None:
+    return conn.execute(
+        """UPDATE device_owners
+           SET display_name = %s
+           WHERE device_id = %s
+           RETURNING user_id, nickname, created_at""",
+        (display_name, device_id),
+    ).fetchone()
+
+
 def batch_exists(conn: psycopg.Connection, batch_id: str) -> bool:
     row = conn.execute("SELECT 1 FROM raw_batches WHERE batch_id = %s", (batch_id,)).fetchone()
     return row is not None

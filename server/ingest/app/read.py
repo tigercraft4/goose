@@ -58,12 +58,50 @@ _DOWNSAMPLE = {
 }
 
 
-def list_devices(conn):
-    rows = conn.execute(
-        "SELECT device_id, mac, name, first_seen, last_seen FROM devices ORDER BY device_id"
-    ).fetchall()
-    cols = ["device_id", "mac", "name", "first_seen", "last_seen"]
+def list_devices(conn, user_id=None):
+    if user_id is None:
+        rows = conn.execute(
+            """SELECT d.device_id, o.display_name, o.user_id, u.name, u.email,
+                      o.created_at, d.last_seen
+               FROM devices d
+               LEFT JOIN device_owners o ON o.device_id = d.device_id
+               LEFT JOIN users u ON u.id = o.user_id
+               ORDER BY d.device_id"""
+        ).fetchall()
+        cols = [
+            "device_id", "display_name", "owner_user_id", "owner_name",
+            "owner_email", "created_at", "last_seen",
+        ]
+    else:
+        rows = conn.execute(
+            """SELECT d.device_id, o.display_name, o.nickname, o.created_at, d.last_seen
+               FROM devices d
+               JOIN device_owners o ON o.device_id = d.device_id
+               WHERE o.user_id = %s
+               ORDER BY d.device_id""",
+            (user_id,),
+        ).fetchall()
+        cols = ["device_id", "display_name", "nickname", "created_at", "last_seen"]
     return [dict(zip(cols, r)) for r in rows]
+
+
+def list_mock_metrics(conn, user_id, device_id=None, limit=100):
+    filters = ["user_id = %s"]
+    params = [user_id]
+    if device_id is not None:
+        filters.append("device_id = %s")
+        params.append(device_id)
+    params.append(limit)
+    rows = conn.execute(
+        """SELECT id::text, device_id, recorded_at, heart_rate, battery
+           FROM mock_metrics
+           WHERE """ + " AND ".join(filters) + """
+           ORDER BY recorded_at DESC
+           LIMIT %s""",
+        params,
+    ).fetchall()
+    cols = ["id", "device_id", "recorded_at", "heart_rate", "battery"]
+    return [dict(zip(cols, row)) for row in rows]
 
 
 def list_batches(conn, device_id, limit=100):
@@ -306,10 +344,34 @@ def query_workouts(conn, device_id, start_date, end_date):
 def read_device_frames(conn, device_id: str, from_ts: float, to_ts: float, limit: int = 5000):
     """Return raw frames for a device in [from_ts, to_ts] unix seconds, paginatable.
 
+    Frames uploaded directly by iOS are authoritative and returned when present.
+    Older deployments fall back to reconstructing timestamps from archived batches.
     Timestamps are interpolated linearly within each batch's [start_ts, end_ts] window.
     Returns list of dicts compatible with the iOS capture.import_frame_batch format:
       {captured_at_unix, frame_hex, source, device_model, device_type, sensitivity}
     """
+    rows = conn.execute(
+        """SELECT extract(epoch FROM captured_at)::float, frame_hex, source,
+                  device_model, device_type, sensitivity
+           FROM raw_frames
+           WHERE device_id = %s
+             AND captured_at >= to_timestamp(%s)
+             AND captured_at <= to_timestamp(%s)
+           ORDER BY captured_at
+           LIMIT %s""",
+        (device_id, from_ts, to_ts, limit),
+    ).fetchall()
+    if rows:
+        cols = [
+            "captured_at_unix",
+            "frame_hex",
+            "source",
+            "device_model",
+            "device_type",
+            "sensitivity",
+        ]
+        return [dict(zip(cols, row)) for row in rows]
+
     name_row = conn.execute(
         "SELECT name FROM devices WHERE device_id = %s", (device_id,)
     ).fetchone()

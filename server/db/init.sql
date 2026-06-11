@@ -7,9 +7,61 @@ CREATE TABLE IF NOT EXISTS devices (
     device_id   TEXT PRIMARY KEY,
     mac         TEXT,
     name        TEXT,
+    device_type TEXT NOT NULL DEFAULT 'whoop',
     first_seen  TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_seen   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS device_type TEXT NOT NULL DEFAULT 'whoop';
+
+-- Minimal multi-tenant identity and device ownership. API tokens are generated
+-- with high entropy and only their SHA-256 digest is stored.
+CREATE TABLE IF NOT EXISTS users (
+    id          UUID PRIMARY KEY,
+    name        TEXT,
+    email       TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id           UUID PRIMARY KEY,
+    user_id      UUID REFERENCES users(id),
+    token_hash   TEXT NOT NULL,
+    token_prefix TEXT,
+    created_at   TIMESTAMPTZ DEFAULT now(),
+    revoked_at   TIMESTAMPTZ NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS api_tokens_token_hash ON api_tokens (token_hash);
+
+CREATE TABLE IF NOT EXISTS device_owners (
+    device_id    TEXT REFERENCES devices(device_id),
+    user_id      UUID REFERENCES users(id),
+    nickname     TEXT,
+    display_name TEXT,
+    created_at   TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (device_id, user_id)
+);
+ALTER TABLE device_owners ADD COLUMN IF NOT EXISTS display_name TEXT;
+-- Phase 1 assigns each physical device to exactly one user. The composite PK
+-- leaves room for a future sharing migration, while this index enforces today's
+-- exclusive-owner rule and closes concurrent first-upload races.
+CREATE UNIQUE INDEX IF NOT EXISTS device_owners_device_id ON device_owners (device_id);
+
+-- Account-stamped manual metrics used by the pre-BLE ownership flow. Keeping the
+-- user id on each row preserves historical ownership across unclaim/reclaim.
+CREATE TABLE IF NOT EXISTS mock_metrics (
+    id          UUID PRIMARY KEY,
+    user_id     UUID NOT NULL REFERENCES users(id),
+    device_id   TEXT NOT NULL REFERENCES devices(device_id),
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    heart_rate  SMALLINT CHECK (heart_rate >= 0 AND heart_rate <= 300),
+    battery     REAL CHECK (battery >= 0 AND battery <= 100)
+);
+CREATE INDEX IF NOT EXISTS mock_metrics_user_time
+    ON mock_metrics (user_id, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS mock_metrics_device_time
+    ON mock_metrics (device_id, recorded_at DESC);
 
 CREATE TABLE IF NOT EXISTS raw_batches (
     batch_id          TEXT PRIMARY KEY,  -- opaque idempotency key (UUID from live/Mac; "hist-<device>-<trim>" from backfill)
@@ -25,6 +77,20 @@ CREATE TABLE IF NOT EXISTS raw_batches (
     byte_size         BIGINT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS raw_batches_device_time ON raw_batches (device_id, start_ts);
+
+-- Raw frames uploaded by the current iOS /v1/ingest-frames flow.
+CREATE TABLE IF NOT EXISTS raw_frames (
+    device_id       TEXT NOT NULL REFERENCES devices(device_id),
+    captured_at     TIMESTAMPTZ NOT NULL,
+    frame_hex       TEXT NOT NULL,
+    source          TEXT,
+    device_type     TEXT,
+    device_model    TEXT,
+    sensitivity     TEXT,
+    received_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (device_id, captured_at, frame_hex)
+);
+CREATE INDEX IF NOT EXISTS raw_frames_device_time ON raw_frames (device_id, captured_at);
 
 -- Decoded summary streams (Timescale hypertables; partition column `ts` is in every PK).
 CREATE TABLE IF NOT EXISTS hr_samples (

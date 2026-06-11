@@ -12,7 +12,6 @@ struct MoreView: View {
   @EnvironmentObject private var router: AppRouter
   private var healthStore: HealthDataStore
   @StateObject private var store: MoreDataStore
-  @AppStorage(OnboardingStorage.firstName) private var profileFirstName = ""
   @AppStorage(OnboardingStorage.unitSystem) private var profileUnitSystemRaw = "imperial"
   @AppStorage(OnboardingStorage.heightMm) private var profileHeightMm = 0
   @AppStorage(OnboardingStorage.weightGrams) private var profileWeightGrams = 0
@@ -35,7 +34,6 @@ struct MoreView: View {
       Section {
         NavigationLink(value: MoreRoute.profile) {
           MoreGreetingHeader(
-            firstName: profileFirstName,
             profileSummary: profileSummary
           )
         }

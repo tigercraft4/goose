@@ -43,6 +43,8 @@ private struct DeviceContentView: View {
               batteryPercent: ble.batteryLevelPercent,
               isCharging: ble.batteryIsCharging == true
             )
+            AccountDevicesPanel()
+              .padding(.top, 24)
           } else {
             DeviceAdvancedPanel(model: model, packetMonitor: packetMonitor, ble: ble)
           }

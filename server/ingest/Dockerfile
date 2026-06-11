@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir /app/whoop-protocol
 # Copy schema and application
 COPY db /app/db
 COPY ingest/app /app/app
+COPY scripts /app/scripts
 # Run as non-root user (Trivy DS-0002)
 RUN useradd --no-create-home --shell /bin/false appuser
 USER appuser

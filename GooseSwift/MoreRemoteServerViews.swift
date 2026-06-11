@@ -32,6 +32,7 @@ final class MoreRemoteServerViewModel: ObservableObject {
 struct MoreRemoteServerView: View {
   @StateObject private var vm = MoreRemoteServerViewModel()
   @Environment(GooseAppModel.self) private var model
+  @Environment(AccountSession.self) private var accountSession
 
   private static let relativeDateFormatter: RelativeDateTimeFormatter = {
     let f = RelativeDateTimeFormatter()
@@ -58,6 +59,12 @@ struct MoreRemoteServerView: View {
       }
 
       Section("Authentication") {
+        if let account = accountSession.account {
+          LabeledContent("Signed in", value: account.email)
+          Button("Log Out", role: .destructive) {
+            accountSession.logout()
+          }
+        }
         SecureField("Bearer token (API key)", text: $vm.bearerToken)
           .autocorrectionDisabled()
           .textInputAutocapitalization(.never)

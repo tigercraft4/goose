@@ -2,13 +2,19 @@ import SwiftUI
 
 struct RootView: View {
   @Environment(GooseAppModel.self) private var model
+  @Environment(AccountSession.self) private var accountSession
   @AppStorage(OnboardingStorage.onboardingComplete) private var onboardingComplete = false
   @AppStorage(OnboardingStorage.onboardingRedoRequested) private var onboardingRedoRequested = false
 
   var body: some View {
     ZStack(alignment: .top) {
       Group {
-        if onboardingComplete {
+        if accountSession.isRestoringSession {
+          ProgressView("Restoring session...")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if !accountSession.isAuthenticated {
+          AccountWelcomeView()
+        } else if onboardingComplete {
           AppShellView()
         } else {
           OnboardingView {
@@ -25,6 +31,9 @@ struct RootView: View {
       mirrorCurrentOnboardingStateIfNeeded()
       restorePersistedOnboardingStateIfNeeded()
       syncModelOnboardingState()
+    }
+    .task {
+      await accountSession.restoreSession()
     }
     .onChange(of: onboardingComplete) { _, _ in
       mirrorCurrentOnboardingStateIfNeeded()

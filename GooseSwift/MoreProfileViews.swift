@@ -8,7 +8,7 @@ import HealthKit
 #endif
 
 struct MoreGreetingHeader: View {
-  let firstName: String
+  @Environment(AccountSession.self) private var accountSession
   let profileSummary: String
 
   var body: some View {
@@ -17,7 +17,7 @@ struct MoreGreetingHeader: View {
         Text(greeting)
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(.secondary)
-        Text(displayName)
+        Text(authenticatedAccountDisplayName(accountSession))
           .font(.headline)
         Text(profileSummary)
           .font(.caption)
@@ -33,11 +33,6 @@ struct MoreGreetingHeader: View {
         .foregroundStyle(.blue)
     }
     .padding(.vertical, 5)
-  }
-
-  private var displayName: String {
-    let trimmed = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
-    return trimmed.isEmpty ? "there" : trimmed
   }
 
   private var greeting: String {
@@ -87,6 +82,7 @@ struct MoreDeveloperView: View {
 
 struct MoreProfileView: View {
   @Environment(GooseAppModel.self) private var model
+  @Environment(AccountSession.self) private var accountSession
   @AppStorage(OnboardingStorage.firstName) private var firstName = ""
   @AppStorage(OnboardingStorage.dateOfBirth) private var dateOfBirthString = ""
   @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
@@ -102,6 +98,7 @@ struct MoreProfileView: View {
   @State private var dateOfBirth = MoreProfileDate.defaultDateOfBirth()
   @State private var statusMessage: String?
   @State private var healthKitImporting = false
+  @State private var showingLogoutConfirmation = false
   @FocusState private var focusedField: MoreProfileField?
 
   private var unitSystem: MoreProfileUnitSystem {
@@ -110,6 +107,19 @@ struct MoreProfileView: View {
 
   var body: some View {
     List {
+      Section {
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Welcome back,")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+          Text(accountDisplayName)
+            .font(.system(size: 28, weight: .black))
+            .foregroundStyle(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 6)
+      }
+
       Section("Personal") {
         HStack {
           Text("First name")
@@ -195,6 +205,55 @@ struct MoreProfileView: View {
         .disabled(healthKitImporting)
       }
 
+      Section("Developer Data") {
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Welcome, \(accountDisplayName)")
+            .font(.headline)
+          Text("Temporary multi-tenant account and ownership diagnostics.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+
+        DeveloperDataRow(
+          label: "Email",
+          value: accountSession.account?.email ?? "Not logged in"
+        )
+        DeveloperDataRow(
+          label: "User ID",
+          value: accountSession.account?.id ?? "Not logged in",
+          copyValue: accountSession.account?.id
+        )
+        DeveloperDataRow(
+          label: "API Token",
+          value: accountTokenDisplayValue,
+          copyValue: accountTokenCopyValue
+        )
+        DeveloperDataRow(
+          label: "Claimed Device ID",
+          value: claimedDevice?.deviceID ?? "No device claimed",
+          copyValue: claimedDevice?.deviceID
+        )
+        DeveloperDataRow(
+          label: "Device Name",
+          value: claimedDeviceName
+        )
+        DeveloperDataRow(
+          label: "Connection Status",
+          value: connectionStatus,
+          valueColor: isDeviceConnected ? .green : .secondary
+        )
+      }
+
+      Section {
+        Button("Log Out", role: .destructive) {
+          showingLogoutConfirmation = true
+        }
+        .frame(maxWidth: .infinity)
+      } footer: {
+        Text("Logging out removes this account, API token, and cached device ownership from this device.")
+      }
+
       if let statusMessage {
         Section {
           Text(statusMessage)
@@ -228,12 +287,57 @@ struct MoreProfileView: View {
       hydrateDateOfBirth()
       hydrateMeasurementsIfNeeded()
     }
+    .task {
+      await accountSession.refreshClaimedDevices()
+    }
     .onChange(of: dateOfBirth) { _, newValue in
       dateOfBirthString = MoreProfileDate.dateOnlyString(MoreProfileDate.clamp(newValue))
     }
     .onChange(of: unitSystemRaw) { oldValue, newValue in
       convertDisplayedMeasurements(from: oldValue, to: newValue)
     }
+    .alert("Log Out?", isPresented: $showingLogoutConfirmation) {
+      Button("Cancel", role: .cancel) {}
+      Button("Log Out", role: .destructive) {
+        focusedField = nil
+        accountSession.logout()
+      }
+    } message: {
+      Text("You will need to log in again to access your account and claimed devices.")
+    }
+  }
+
+  private var accountDisplayName: String {
+    authenticatedAccountDisplayName(accountSession)
+  }
+
+  private var accountTokenCopyValue: String? {
+    let token = accountSession.token
+    return token.isEmpty ? nil : token
+  }
+
+  private var accountTokenDisplayValue: String {
+    accountTokenCopyValue ?? "No token available"
+  }
+
+  private var claimedDevice: ClaimedDevice? {
+    accountSession.claimedDevices.first
+  }
+
+  private var claimedDeviceName: String {
+    guard let claimedDevice else {
+      return "No device claimed"
+    }
+    return claimedDevice.displayName ?? claimedDevice.nickname ?? claimedDevice.deviceID
+  }
+
+  private var isDeviceConnected: Bool {
+    let state = model.ble.connectionState.lowercased()
+    return state == "ready" || state == "connected" || state == "discovering"
+  }
+
+  private var connectionStatus: String {
+    isDeviceConnected ? "Connected" : "Disconnected"
   }
 
   private func hydrateDateOfBirth() {
@@ -428,6 +532,59 @@ struct MoreProfileView: View {
       .trimmingCharacters(in: .whitespacesAndNewlines)
       .replacingOccurrences(of: ",", with: ".")
     return Double(normalized)
+  }
+}
+
+@MainActor
+private func authenticatedAccountDisplayName(_ accountSession: AccountSession) -> String {
+  guard accountSession.isAuthenticated,
+        let name = accountSession.account?.name?
+          .trimmingCharacters(in: .whitespacesAndNewlines),
+        !name.isEmpty else {
+    return "Loading..."
+  }
+  return name
+}
+
+private struct DeveloperDataRow: View {
+  let label: String
+  let value: String
+  var copyValue: String?
+  var valueColor: Color = .primary
+  @State private var copied = false
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 7) {
+      HStack(alignment: .firstTextBaseline, spacing: 10) {
+        Text(label)
+          .font(.caption.weight(.semibold))
+          .foregroundStyle(.secondary)
+        Spacer(minLength: 8)
+        if let copyValue, !copyValue.isEmpty {
+          Button {
+            UIPasteboard.general.string = copyValue
+            copied = true
+            Task {
+              try? await Task.sleep(for: .seconds(1.5))
+              copied = false
+            }
+          } label: {
+            Label(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
+              .font(.caption.weight(.semibold))
+          }
+          .buttonStyle(.borderless)
+          .accessibilityLabel("Copy \(label)")
+        }
+      }
+
+      Text(value)
+        .font(.system(.body, design: .monospaced))
+        .foregroundStyle(valueColor)
+        .textSelection(.enabled)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    .padding(.vertical, 5)
   }
 }
 
