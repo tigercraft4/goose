@@ -138,7 +138,7 @@ path = "src/bin/goose-perf-budget.rs"
 [dependencies]
 crc32fast = "1.4"
 hex = "0.4"
-rusqlite = { version = "0.37", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
