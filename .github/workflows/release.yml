@@ -87,7 +87,7 @@ jobs:
           echo "ipa-size=$IPA_SIZE" >> "$GITHUB_OUTPUT"
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ipa
           path: ${{ steps.package.outputs.ipa-name }}
