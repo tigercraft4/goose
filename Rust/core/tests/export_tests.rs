@@ -515,7 +515,7 @@ fn exports_sqlite_timeframe_to_jsonl_csv_and_sqlite_bundle() {
     assert_eq!(report.raw_rows, 8);
     assert_eq!(report.decoded_frame_rows, 8);
     assert_eq!(report.packet_timeline_rows, 8);
-    assert_eq!(report.sensor_sample_rows, 18); // V18 extracts HR from data[22]; fixture k18 frame HR at old marker pos[14] no longer counted
+    assert_eq!(report.sensor_sample_rows, 19);
     assert_eq!(report.metric_feature_report_rows, 7);
     // 7 original HrvOutput fields + ectopic_filter_removal_fraction + window_tier_used = 9
     assert_eq!(report.metric_value_rows, 9);
@@ -651,7 +651,7 @@ fn exports_sqlite_timeframe_to_jsonl_csv_and_sqlite_bundle() {
         fs::read_to_string(export_dir.join("data/metric_components.jsonl")).unwrap();
     assert!(decoded_frames.contains("raw_motion_k10"));
     assert!(packet_timeline.contains("body_summary"));
-    assert!(sensor_samples.contains("v18_history_hr")); // k18 reclassified to V18History in phase 67
+    assert!(sensor_samples.contains("normal_history_hr_marker"));
     assert!(sensor_samples.contains("r17_samples"));
     assert!(sensor_samples.contains("\"sample_value\":-1000"));
     assert!(metric_features.contains("goose.motion-feature-report.v1"));
@@ -691,7 +691,7 @@ fn exports_sqlite_timeframe_to_jsonl_csv_and_sqlite_bundle() {
     assert_eq!(validation.content.raw_evidence_rows, 8);
     assert_eq!(validation.content.decoded_frame_rows, 8);
     assert_eq!(validation.content.packet_timeline_rows, 8);
-    assert_eq!(validation.content.sensor_sample_rows, 18); // V18 reclassification
+    assert_eq!(validation.content.sensor_sample_rows, 19);
     assert_eq!(validation.content.metric_feature_report_rows, 7);
     // 7 original HrvOutput fields + ectopic_filter_removal_fraction + window_tier_used = 9
     assert_eq!(validation.content.metric_value_rows, 9);
@@ -894,7 +894,7 @@ fn raw_export_can_select_sensor_samples_only() {
     assert!(report.pass, "{:?}", report.issues);
     assert_eq!(report.raw_rows, 0);
     assert_eq!(report.decoded_frame_rows, 0);
-    assert_eq!(report.sensor_sample_rows, 18); // V18 extracts HR from data[22]; fixture k18 frame HR at old marker pos[14] no longer counted
+    assert_eq!(report.sensor_sample_rows, 19);
     assert_eq!(
         report.manifest.data_families,
         vec!["sensor_samples".to_string()]
@@ -909,13 +909,13 @@ fn raw_export_can_select_sensor_samples_only() {
     assert!(sensor_samples.contains("\"raw_i16\":-2"));
     assert!(sensor_samples.contains("\"source_signal\":\"raw_motion_k10_heart_rate\""));
     assert!(sensor_samples.contains("\"raw_u8\":72"));
-    assert!(sensor_samples.contains("\"source_signal\":\"v18_history_hr\"")); // k18 reclassified to V18History in phase 67
+    assert!(sensor_samples.contains("\"source_signal\":\"normal_history_hr_marker\""));
     assert!(sensor_samples.contains("\"source_signal\":\"r17_optical_or_labrador_filtered\""));
     assert!(sensor_samples.contains("\"source_signal\":\"raw_motion_k21\""));
 
     let validation = validate_export_bundle(&export_dir).unwrap();
     assert!(validation.pass, "{:?}", validation.issues);
-    assert_eq!(validation.content.sensor_sample_rows, 18); // V18 reclassification
+    assert_eq!(validation.content.sensor_sample_rows, 19);
     assert_eq!(validation.content.raw_evidence_rows, 0);
     assert_eq!(validation.content.decoded_frame_rows, 0);
 }
