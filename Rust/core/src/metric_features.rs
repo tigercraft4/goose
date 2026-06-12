@@ -1168,8 +1168,10 @@ pub fn run_heart_rate_feature_report(
     correlation: &CaptureCorrelationReport,
     options: HeartRateFeatureOptions,
 ) -> GooseResult<HeartRateFeatureReport> {
-    let trusted_frames =
-        trusted_frames_for_summary_kinds(correlation, &["normal_history", "v18_history", "raw_motion_k10"]);
+    let trusted_frames = trusted_frames_for_summary_kinds(
+        correlation,
+        &["normal_history", "v18_history", "raw_motion_k10"],
+    );
     let mut issues = Vec::new();
     if options.require_trusted_evidence && !correlation.pass {
         issues.push("capture_correlation_report_not_passed".to_string());
@@ -4137,8 +4139,7 @@ fn heart_rate_plan_from_row(row: &DecodedFrameRow) -> GooseResult<Option<HeartRa
             device_timestamp_subseconds: timestamp_subseconds,
         }),
         DataPacketBodySummary::V18History {
-            hr: Some(v18_hr),
-            ..
+            hr: Some(v18_hr), ..
         } => Some(HeartRatePlan {
             body_summary_kind: "v18_history",
             source_signal: "v18_history_hr",
@@ -4211,10 +4212,11 @@ fn skin_temperature_plan_from_payload(
         packet_k: Some(packet_k),
         timestamp_seconds,
         timestamp_subseconds,
-        body_summary: Some(
-            DataPacketBodySummary::NormalHistory { .. }
-            | DataPacketBodySummary::V18History { .. },
-        ),
+        body_summary:
+            Some(
+                DataPacketBodySummary::NormalHistory { .. }
+                | DataPacketBodySummary::V18History { .. },
+            ),
         ..
     }) = parsed_payload
     else {
@@ -4255,10 +4257,11 @@ fn respiratory_rate_plan_from_payload(
         packet_k: Some(packet_k),
         timestamp_seconds,
         timestamp_subseconds,
-        body_summary: Some(
-            DataPacketBodySummary::NormalHistory { .. }
-            | DataPacketBodySummary::V18History { .. },
-        ),
+        body_summary:
+            Some(
+                DataPacketBodySummary::NormalHistory { .. }
+                | DataPacketBodySummary::V18History { .. },
+            ),
         ..
     }) = parsed_payload
     else {

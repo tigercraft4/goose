@@ -1909,8 +1909,7 @@ fn timestamp_packet_confirmed_rows(
             let is_event_packet = packet_kind.contains("event");
             let captured_at_unix_s = captured_at_unix_ms / 1_000;
             let effective_device_seconds = if !is_event_packet
-                && (captured_at_unix_s - i64::from(device_timestamp_seconds))
-                    .unsigned_abs()
+                && (captured_at_unix_s - i64::from(device_timestamp_seconds)).unsigned_abs()
                     > 86_400
             {
                 (device_timestamp_seconds / 300) * 300

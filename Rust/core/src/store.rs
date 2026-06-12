@@ -9704,7 +9704,10 @@ mod v20_migration_tests {
             .conn
             .query_row("PRAGMA user_version", [], |r| r.get(0))
             .expect("user_version");
-        assert_eq!(version, 20, "PRAGMA user_version must be 20 after migration");
+        assert_eq!(
+            version, 20,
+            "PRAGMA user_version must be 20 after migration"
+        );
     }
 
     #[test]

@@ -9926,7 +9926,11 @@ fn stale_device_clock_snaps_to_300s_grid_for_timestamp_confirmation() {
             ]
         }
     }));
-    assert!(response.ok, "validate_physical_evidence failed: {:?}", response.error);
+    assert!(
+        response.ok,
+        "validate_physical_evidence failed: {:?}",
+        response.error
+    );
     let result = response.result.unwrap();
 
     // The stale-clock guard must snap device_timestamp_seconds=946685800 → 946685700
@@ -9991,7 +9995,11 @@ fn event_packet_timestamp_bypasses_stale_clock_snap() {
             ]
         }
     }));
-    assert!(response.ok, "validate_physical_evidence failed: {:?}", response.error);
+    assert!(
+        response.ok,
+        "validate_physical_evidence failed: {:?}",
+        response.error
+    );
     let result = response.result.unwrap();
 
     // The EVENT row must be confirmed using the raw device_timestamp (946685800 s = "2000-01-01T00:16:40Z"),

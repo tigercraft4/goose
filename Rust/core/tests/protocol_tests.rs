@@ -574,10 +574,18 @@ fn r22_4byte_parses_battery_and_hr() {
     let parsed = parse_frame(DeviceType::Goose, &frame).unwrap();
 
     assert_eq!(parsed.packet_type, Some(0x10));
-    assert_eq!(parsed.packet_type_name.as_deref(), Some("R22_REALTIME_DATA"));
+    assert_eq!(
+        parsed.packet_type_name.as_deref(),
+        Some("R22_REALTIME_DATA")
+    );
 
     match parsed.parsed_payload.unwrap() {
-        ParsedPayload::DataPacket { domain, body_summary, warnings, .. } => {
+        ParsedPayload::DataPacket {
+            domain,
+            body_summary,
+            warnings,
+            ..
+        } => {
             assert_eq!(domain.as_deref(), Some("r22_whoop5_hr"));
             assert!(warnings.is_empty());
             match body_summary.unwrap() {
@@ -609,7 +617,11 @@ fn r22_6byte_parses_battery_hr_and_extra_raw() {
     let parsed = parse_frame(DeviceType::Goose, &frame).unwrap();
 
     match parsed.parsed_payload.unwrap() {
-        ParsedPayload::DataPacket { body_summary, warnings, .. } => {
+        ParsedPayload::DataPacket {
+            body_summary,
+            warnings,
+            ..
+        } => {
             assert!(warnings.is_empty());
             match body_summary.unwrap() {
                 DataPacketBodySummary::R22Whoop5Hr {
@@ -643,7 +655,11 @@ fn r22_zero_hr_bytes_parse_as_zero_not_error() {
     let parsed = parse_frame(DeviceType::Goose, &frame).unwrap();
 
     match parsed.parsed_payload.unwrap() {
-        ParsedPayload::DataPacket { body_summary, warnings, .. } => {
+        ParsedPayload::DataPacket {
+            body_summary,
+            warnings,
+            ..
+        } => {
             assert!(warnings.is_empty(), "unexpected warnings: {warnings:?}");
             match body_summary.unwrap() {
                 DataPacketBodySummary::R22Whoop5Hr {
@@ -696,8 +712,15 @@ fn parses_v18_historical_body_fields() {
 
     assert_eq!(parsed.packet_type_name.as_deref(), Some("HISTORICAL_DATA"));
     match parsed.parsed_payload.unwrap() {
-        ParsedPayload::DataPacket { body_summary, warnings, .. } => {
-            assert!(warnings.is_empty(), "unexpected outer warnings: {warnings:?}");
+        ParsedPayload::DataPacket {
+            body_summary,
+            warnings,
+            ..
+        } => {
+            assert!(
+                warnings.is_empty(),
+                "unexpected outer warnings: {warnings:?}"
+            );
             match body_summary.unwrap() {
                 DataPacketBodySummary::V18History {
                     hr,
@@ -739,18 +762,23 @@ fn v18_too_short_yields_warning() {
     let parsed = parse_frame(DeviceType::Goose, &frame).unwrap();
 
     match parsed.parsed_payload.unwrap() {
-        ParsedPayload::DataPacket { body_summary, .. } => {
-            match body_summary.unwrap() {
-                DataPacketBodySummary::V18History { hr, rr_intervals_ms, gravity_x, skin_temp_raw, warnings, .. } => {
-                    assert_eq!(hr, None);
-                    assert!(rr_intervals_ms.is_empty());
-                    assert_eq!(gravity_x, None);
-                    assert_eq!(skin_temp_raw, None);
-                    assert!(warnings.contains(&"v18_payload_too_short".to_string()));
-                }
-                other => panic!("expected V18History, got {other:?}"),
+        ParsedPayload::DataPacket { body_summary, .. } => match body_summary.unwrap() {
+            DataPacketBodySummary::V18History {
+                hr,
+                rr_intervals_ms,
+                gravity_x,
+                skin_temp_raw,
+                warnings,
+                ..
+            } => {
+                assert_eq!(hr, None);
+                assert!(rr_intervals_ms.is_empty());
+                assert_eq!(gravity_x, None);
+                assert_eq!(skin_temp_raw, None);
+                assert!(warnings.contains(&"v18_payload_too_short".to_string()));
             }
-        }
+            other => panic!("expected V18History, got {other:?}"),
+        },
         other => panic!("expected DataPacket, got {other:?}"),
     }
 }
