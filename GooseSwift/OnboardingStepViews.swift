@@ -165,9 +165,12 @@ struct OnboardingPermissionStep: View {
           }
 
           VStack(alignment: .leading, spacing: 10) {
+            // Neutral bullets: these list what the permission enables, not
+            // state that has been granted, so no checkmarks here.
             ForEach(details, id: \.self) { detail in
-              Label(detail, systemImage: "checkmark.circle.fill")
+              Label(detail, systemImage: "circle.fill")
                 .font(.subheadline)
+                .imageScale(.small)
                 .foregroundStyle(.secondary)
                 .labelStyle(.titleAndIcon)
             }
@@ -274,7 +277,7 @@ struct OnboardingConnectStep: View {
 
   private var connectBody: String {
     if canVerify {
-      return "Finish setup to start using Goose with this strap."
+      return "Finish setup to start using Goose with this strap. Sleep and recovery insights appear after your first night of wear; baselines build over the first week."
     }
     if connected {
       return "Keep the strap close while Goose confirms it can read data."
