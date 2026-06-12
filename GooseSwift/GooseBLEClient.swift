@@ -43,6 +43,10 @@ import OSLog
   var hardwareRevision: String?
   var softwareRevision: String?
   var manufacturerName: String?
+  // Budget for re-discovering Device Information after a failed read; reset on
+  // each connection. Failed reads are common right after a strap firmware
+  // update, when iOS still serves the pre-update GATT attribute cache.
+  var metadataReadRetriesRemaining = 2
   var historicalPacketCount = 0
   var lastHistoricalSyncCompletedAt: Date?
   var lastHistoricalRangeCommandStatus = "No GET_DATA_RANGE response"

@@ -251,6 +251,9 @@ extension GooseBLEClient: CBPeripheralDelegate {
         title: readValue ? "metadata.read.failed" : "notification.error",
         body: error.localizedDescription
       )
+      if readValue {
+        scheduleMetadataReadRetryIfNeeded(for: characteristic)
+      }
       return
     }
     guard let value else {

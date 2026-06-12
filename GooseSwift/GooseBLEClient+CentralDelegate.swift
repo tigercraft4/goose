@@ -186,6 +186,7 @@ extension GooseBLEClient: CBCentralManagerDelegate {
     activePeripheral = peripheral
     peripheral.delegate = self
     clientHelloSentForCurrentConnection = false
+    metadataReadRetriesRemaining = 2
     // Cancel any pending scheduled retry and reset backoff before updating state.
     cancelReconnectCycle()
     reconnectBackoff.reset()

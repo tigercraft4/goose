@@ -186,13 +186,39 @@ extension GooseBLEClient {
   func decodedMetadataString(_ data: Data) -> String? {
     var trimSet = CharacterSet.whitespacesAndNewlines
     trimSet.formUnion(.controlCharacters)
-    guard let string = String(data: data, encoding: .utf8)?
-      .trimmingCharacters(in: trimSet),
-      !string.isEmpty
+    if let string = String(data: data, encoding: .utf8)?.trimmingCharacters(in: trimSet),
+       !string.isEmpty {
+      return string
+    }
+    // Some firmware revisions pad device-info strings with non-UTF-8 bytes;
+    // salvage the printable ASCII run instead of reporting Unknown.
+    let printable = data.filter { (0x20...0x7E).contains($0) }
+    guard !printable.isEmpty,
+          let salvaged = String(data: Data(printable), encoding: .ascii)?.trimmingCharacters(in: trimSet),
+          !salvaged.isEmpty
     else {
       return nil
     }
-    return string
+    return salvaged
+  }
+
+  // A failed device-info read usually means iOS is serving a stale GATT
+  // attribute cache or the bond was invalidated by a strap firmware update.
+  // Re-discovering the service refreshes the handles, so retry through the
+  // full refresh path a bounded number of times per connection.
+  func scheduleMetadataReadRetryIfNeeded(for characteristic: CBCharacteristic) {
+    guard metadataReadRetriesRemaining > 0 else {
+      return
+    }
+    metadataReadRetriesRemaining -= 1
+    record(
+      source: "ble.metadata",
+      title: "device_info.read.retry",
+      body: "\(characteristic.uuid.uuidString) retries_left=\(metadataReadRetriesRemaining)"
+    )
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+      self?.refreshDeviceInformation()
+    }
   }
 
   static func parseBatteryLevelStatus(_ data: Data) -> BatteryLevelStatus? {
