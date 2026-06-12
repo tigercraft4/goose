@@ -19,7 +19,6 @@ struct HomeDashboardView: View {
       LazyVStack(alignment: .leading, spacing: 18) {
         HomeDailyScoreCard(
           scores: scoreSnapshots,
-          actionSummary: dailyActionSummary,
           coachTip: CoachTipFactory.homeTip(healthStore: healthStore, appModel: model),
           openScore: openHealth,
           openCoach: openCoach
@@ -195,14 +194,6 @@ struct HomeDashboardView: View {
 
   private var baselineProgress: BaselineProgressModel {
     healthStore.baselineProgress()
-  }
-
-  private var dailyActionSummary: String {
-    let inputAction = healthStore.metricInputReadinessNextActionSummary()
-    if !inputAction.isEmpty {
-      return inputAction
-    }
-    return healthStore.packetDerivedScoreNextActionSummary()
   }
 
   private func refreshSnapshots() {

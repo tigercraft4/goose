@@ -28,10 +28,11 @@ enum CoachTipFactory {
     return CoachInlineTip(
       id: "home",
       title: "Coach",
-      message: firstUseful(
-        inputNextAction,
-        scoreNextAction,
-        "Readiness: \(readiness). Sleep \(sleep.displayValue), recovery \(recovery.displayValue), strain \(strain.displayValue)."
+      message: homeTipMessage(
+        progress: healthStore.baselineProgress(),
+        sleep: sleep,
+        recovery: recovery,
+        strain: strain
       ),
       source: "Local readiness, scores, and live HR",
       prompt: """
@@ -49,6 +50,32 @@ enum CoachTipFactory {
       systemImage: "sparkles",
       tint: .purple
     )
+  }
+
+  // The Rust readiness/score reports expose next_actions written for
+  // engineers ("rerun Capture Trust", "validate the R17 interval scale");
+  // they stay in the Coach prompt as context but never in the visible tip.
+  private static func homeTipMessage(
+    progress: BaselineProgressModel,
+    sleep: HealthMetricSnapshot,
+    recovery: HealthMetricSnapshot,
+    strain: HealthMetricSnapshot
+  ) -> String {
+    guard progress.hasReport else {
+      return String(localized: "Goose is waiting for its first night of data. Wear your strap and keep it connected.")
+    }
+    let collecting = progress.collectingFamilies.map(\.title)
+    if !progress.allReady, !collecting.isEmpty {
+      switch collecting.count {
+      case 1:
+        return String(localized: "Still collecting data for \(collecting[0]). Keep wearing your strap and the score will fill in.")
+      case 2:
+        return String(localized: "Still collecting data for \(collecting[0]) and \(collecting[1]). Keep wearing your strap and the scores will fill in.")
+      default:
+        return String(localized: "\(progress.readyFamilies) of \(progress.totalFamilies) scores ready. Keep wearing your strap and the rest will fill in.")
+      }
+    }
+    return String(localized: "Sleep \(sleep.displayValue), recovery \(recovery.displayValue), strain \(strain.displayValue). Ask Coach what to prioritise today.")
   }
 
   static func metricTip(
@@ -92,7 +119,7 @@ enum CoachTipFactory {
       message: firstUseful(
         sentence("Sleep \(snapshot.displayValue)", snapshot.status, schedule),
         sentence("Sleep \(snapshot.displayValue)", debt, confidence),
-        nextAction
+        String(localized: "Sleep score appears after your first full night with the strap.")
       ),
       source: "Local sleep score and schedule",
       prompt: """
@@ -156,7 +183,10 @@ enum CoachTipFactory {
     return CoachInlineTip(
       id: "strain",
       title: "Strain Coach",
-      message: sentence("Current: \(strain)", "Target today: \(target)", firstUseful(nextAction, motion)),
+      message: sentence(
+        String(localized: "Strain \(snapshot.displayValue)"),
+        String(localized: "Target today: \(target)")
+      ),
       source: "Local strain, optimal target, motion, and activity",
       prompt: """
       Explain my strain page and give one practical training-load next action. Use WHOOP's 0-21 strain scale, today's optimal target, and cite local tool outputs.
@@ -185,10 +215,16 @@ enum CoachTipFactory {
       updatedAt: appModel.ble.liveHeartRateUpdatedAt
     )
 
+    let liveHeartRateText = appModel.ble.liveHeartRateBPM.map { "\($0) bpm" }
+
     return CoachInlineTip(
       id: "stress",
       title: "Stress Coach",
-      message: sentence(stress, "HRV: \(hrv)", "Latest HR: \(liveHeartRate)"),
+      message: sentence(
+        String(localized: "Stress \(snapshot.displayValue)"),
+        String(localized: "HRV: \(healthStore.recoveryHRVDisplayText())"),
+        liveHeartRateText.map { String(localized: "Latest HR: \($0)") } ?? ""
+      ),
       source: "Local stress, HRV, and live HR",
       prompt: """
       Explain my stress page and give one practical next action. Use stress score, HRV, latest heart rate, and missing time-series data. Cite local tool outputs.
@@ -208,7 +244,7 @@ enum CoachTipFactory {
   private static func firstUseful(_ values: String...) -> String {
     values
       .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .first { !$0.isEmpty } ?? "Open Coach for the next local-data recommendation."
+      .first { !$0.isEmpty } ?? String(localized: "Open Coach for today's recommendation.")
   }
 
   private static func sentence(_ parts: String...) -> String {

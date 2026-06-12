@@ -44,7 +44,6 @@ struct HomeStartActivityFloatingButton: View {
 
 struct HomeDailyScoreCard: View {
   let scores: [HealthMetricSnapshot]
-  let actionSummary: String
   let coachTip: CoachInlineTip
   let openScore: (HealthRoute) -> Void
   let openCoach: (String) -> Void
@@ -63,26 +62,11 @@ struct HomeDailyScoreCard: View {
       }
       .frame(maxWidth: .infinity)
 
-      CoachTipCard(tip: displayCoachTip) {
+      CoachTipCard(tip: coachTip) {
         openCoach(coachTip.prompt)
       }
       .padding(.top, 2)
     }
-  }
-
-  private var displayCoachTip: CoachInlineTip {
-    guard coachTip.message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      return coachTip
-    }
-    return CoachInlineTip(
-      id: coachTip.id,
-      title: coachTip.title,
-      message: actionSummary,
-      source: coachTip.source,
-      prompt: coachTip.prompt,
-      systemImage: coachTip.systemImage,
-      tint: coachTip.tint
-    )
   }
 }
 
