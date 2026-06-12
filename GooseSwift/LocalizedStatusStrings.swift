@@ -8,6 +8,8 @@ import Foundation
 // These extension methods are the only translation boundary: call .localizedXxx only
 // at view display sites (Text, LabeledContent value:, statusText). Never use them in
 // guards, comparisons, or switch statements that drive control flow (Pitfall 2 / D-03).
+//
+// Keys are the English source strings; translations live in Localizable.xcstrings.
 
 extension String {
 
@@ -19,8 +21,8 @@ extension String {
     case "disconnected": return String(localized: "Disconnected")
     case "connecting": return String(localized: "Connecting")
     case "connected": return String(localized: "Connected")
-    case "discovering": return String(localized: "A descobrir...")
-    case "ready": return String(localized: "Ligado")
+    case "discovering": return String(localized: "Discovering...")
+    case "ready": return String(localized: "Ready")
     default: return self
     }
   }
@@ -43,13 +45,13 @@ extension String {
 
   var localizedBluetoothState: String {
     switch self {
-    case "powered on":   return String(localized: "Ativo")
+    case "powered on":   return String(localized: "Active")
     case "powered off":  return String(localized: "BLUETOOTH OFF")
     case "unauthorized": return String(localized: "NOT AUTHORISED")
-    case "unsupported":  return String(localized: "Não suportado")
-    case "resetting":    return String(localized: "A reiniciar...")
-    case "not requested": return String(localized: "Não solicitado")
-    case "unknown":      return String(localized: "Desconhecido")
+    case "unsupported":  return String(localized: "Not supported")
+    case "resetting":    return String(localized: "Resetting...")
+    case "not requested": return String(localized: "Not requested")
+    case "unknown":      return String(localized: "Unknown")
     case "bluetooth unavailable": return String(localized: "NOT AUTHORISED")
     default: return self
     }
@@ -61,12 +63,12 @@ extension String {
 
   var localizedHRBluetoothState: String {
     switch self {
-    case "poweredOn":    return String(localized: "Ativo")
+    case "poweredOn":    return String(localized: "Active")
     case "poweredOff":   return String(localized: "BLUETOOTH OFF")
     case "unauthorized": return String(localized: "NOT AUTHORISED")
-    case "unsupported":  return String(localized: "Não suportado")
-    case "resetting":    return String(localized: "A reiniciar...")
-    case "unknown":      return String(localized: "Desconhecido")
+    case "unsupported":  return String(localized: "Not supported")
+    case "resetting":    return String(localized: "Resetting...")
+    case "unknown":      return String(localized: "Unknown")
     default: return self
     }
   }
@@ -80,23 +82,23 @@ extension String {
 
   var localizedReconnectState: String {
     switch self {
-    case "idle":               return String(localized: "Inativo")
-    case "already connected":  return String(localized: "Já ligado")
-    case "connecting":         return String(localized: "A ligar...")
-    case "failed after 10 attempts": return String(localized: "Falhou após 10 tentativas")
-    case "blocked":            return String(localized: "Bloqueado")
-    case "waiting for bluetooth": return String(localized: "À espera de Bluetooth")
-    case "no remembered device": return String(localized: "Nenhum dispositivo guardado")
-    case "retrieving remembered": return String(localized: "A recuperar dispositivo...")
-    case "remembered was not WHOOP": return String(localized: "Dispositivo guardado não é WHOOP")
-    case "scanning for remembered WHOOP": return String(localized: "A procurar WHOOP guardado...")
-    case "scanning for remembered": return String(localized: "A procurar dispositivo guardado...")
-    case "scanning for WHOOP physiology": return String(localized: "A procurar fisiologia WHOOP...")
-    case "forgotten": return String(localized: "Esquecido")
-    case "remembered rejected": return String(localized: "Dispositivo recusado")
+    case "idle":               return String(localized: "Idle")
+    case "already connected":  return String(localized: "Already connected")
+    case "connecting":         return String(localized: "Connecting...")
+    case "failed after 10 attempts": return String(localized: "Failed after 10 attempts")
+    case "blocked":            return String(localized: "Blocked")
+    case "waiting for bluetooth": return String(localized: "Waiting for Bluetooth")
+    case "no remembered device": return String(localized: "No saved device")
+    case "retrieving remembered": return String(localized: "Retrieving saved device...")
+    case "remembered was not WHOOP": return String(localized: "Saved device is not WHOOP")
+    case "scanning for remembered WHOOP": return String(localized: "Scanning for saved WHOOP...")
+    case "scanning for remembered": return String(localized: "Scanning for saved device...")
+    case "scanning for WHOOP physiology": return String(localized: "Scanning for WHOOP physiology...")
+    case "forgotten": return String(localized: "Forgotten")
+    case "remembered rejected": return String(localized: "Device rejected")
     default:
       if self.hasPrefix("reconnecting") {
-        return String(localized: "A tentar ligar...")
+        return String(localized: "Reconnecting...")
       }
       return self
     }
@@ -107,12 +109,12 @@ extension String {
 
   var localizedHRReconnectState: String {
     switch self {
-    case "idle":              return String(localized: "Inativo")
-    case "already connected": return String(localized: "Já ligado")
-    case "failed after 10 attempts": return String(localized: "Falhou após 10 tentativas")
+    case "idle":              return String(localized: "Idle")
+    case "already connected": return String(localized: "Already connected")
+    case "failed after 10 attempts": return String(localized: "Failed after 10 attempts")
     default:
       if self.hasPrefix("reconnecting") {
-        return String(localized: "A tentar ligar...")
+        return String(localized: "Reconnecting...")
       }
       return self
     }
@@ -123,11 +125,11 @@ extension String {
 
   var localizedHistoricalSyncStatus: String {
     switch self {
-    case "idle":    return String(localized: "Inativo")
-    case "syncing": return String(localized: "A sincronizar...")
-    case "waiting": return String(localized: "À espera...")
-    case "synced":  return String(localized: "Sincronizado")
-    case "failed":  return String(localized: "Falhou")
+    case "idle":    return String(localized: "Idle")
+    case "syncing": return String(localized: "Syncing...")
+    case "waiting": return String(localized: "Waiting...")
+    case "synced":  return String(localized: "Synced")
+    case "failed":  return String(localized: "Failed")
     default: return self
     }
   }
@@ -140,12 +142,12 @@ extension String {
 
   var localizedStrapClockStatus: String {
     switch self {
-    case "Not read":    return String(localized: "Não lido")
-    case "Syncing clock": return String(localized: "A sincronizar relógio...")
-    case "Clock in sync": return String(localized: "Relógio em sincronia")
-    case "Clock synced":  return String(localized: "Relógio sincronizado")
-    case "Clock command already in flight": return String(localized: "Comando de relógio em curso")
-    case "Clock command blocked by alarm command": return String(localized: "Relógio bloqueado por alarme")
+    case "Not read":    return String(localized: "Not read")
+    case "Syncing clock": return String(localized: "Syncing clock...")
+    case "Clock in sync": return String(localized: "Clock in sync")
+    case "Clock synced":  return String(localized: "Clock synced")
+    case "Clock command already in flight": return String(localized: "Clock command in progress")
+    case "Clock command blocked by alarm command": return String(localized: "Clock blocked by alarm")
     default: return self
     }
   }
@@ -155,8 +157,8 @@ extension String {
 
   var localizedBatteryPowerStatus: String {
     switch self {
-    case "Unknown":            return String(localized: "Desconhecido")
-    case "Charging (inferred)": return String(localized: "A carregar (inferido)")
+    case "Unknown":            return String(localized: "Unknown")
+    case "Charging (inferred)": return String(localized: "Charging (inferred)")
     default: return self
     }
   }
@@ -166,8 +168,8 @@ extension String {
 
   var localizedCaptureStatus: String {
     switch self {
-    case "No health packet capture": return String(localized: "Sem captura de pacotes")
-    case "No active health packet capture": return String(localized: "Sem captura activa")
+    case "No health packet capture": return String(localized: "No packet capture")
+    case "No active health packet capture": return String(localized: "No active capture")
     default: return self
     }
   }
@@ -177,7 +179,7 @@ extension String {
 
   var localizedCaptureTargetSummary: String {
     switch self {
-    case "No health packet capture": return String(localized: "Sem captura de pacotes")
+    case "No health packet capture": return String(localized: "No packet capture")
     default: return self
     }
   }
@@ -188,7 +190,7 @@ extension String {
 
   var localizedActivityDetectionStatus: String {
     switch self {
-    case "Watching for movement packets": return String(localized: "À escuta de pacotes de movimento")
+    case "Watching for movement packets": return String(localized: "Listening for motion packets")
     default: return self
     }
   }
@@ -198,8 +200,8 @@ extension String {
 
   var localizedPacketImportStatus: String {
     switch self {
-    case "No packet import":     return String(localized: "Sem importação de pacotes")
-    case "Packet import failed": return String(localized: "Importação de pacotes falhou")
+    case "No packet import":     return String(localized: "No packet import")
+    case "Packet import failed": return String(localized: "Packet import failed")
     default: return self
     }
   }
@@ -209,11 +211,11 @@ extension String {
 extension GooseBLEBondingState {
   var localizedDescription: String {
     switch self {
-    case .notStarted:         return String(localized: "Não iniciado")
-    case .started:            return String(localized: "A iniciar...")
-    case .subscribed:         return String(localized: "A descobrir...")
-    case .completed:          return String(localized: "Ligado")
-    case .cancelled(let r):   return r.isEmpty ? String(localized: "Cancelado") : r
+    case .notStarted:         return String(localized: "Not started")
+    case .started:            return String(localized: "Starting...")
+    case .subscribed:         return String(localized: "Discovering...")
+    case .completed:          return String(localized: "Connected")
+    case .cancelled(let r):   return r.isEmpty ? String(localized: "Cancelled") : r
     }
   }
 }

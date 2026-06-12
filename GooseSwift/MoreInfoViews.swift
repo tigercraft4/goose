@@ -45,17 +45,17 @@ struct MorePrivacyView: View {
     .gooseListBackground()
     .navigationTitle("Privacy")
     .confirmationDialog(
-      "Eliminar todos os dados locais?",
+      "Delete all local data?",
       isPresented: $showingDeleteConfirm,
       titleVisibility: .visible
     ) {
-      Button("Eliminar", role: .destructive) {
+      Button("Delete", role: .destructive) {
         store.deleteLocalDatabase()
         dbURL = nil
       }
-      Button("Cancelar", role: .cancel) {}
+      Button("Cancel", role: .cancel) {}
     } message: {
-      Text("Esta acção remove a base de dados SQLite local e não pode ser desfeita. Os dados no servidor não são afectados.")
+      Text("This action removes the local SQLite database and cannot be undone. Data on the server is not affected.")
     }
   }
 }

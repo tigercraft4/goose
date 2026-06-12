@@ -13,7 +13,7 @@ final class HealthDataStore {
   var catalogSource = HealthDataSource.unavailable("metric registry not loaded")
   var packetInputStatus = "No run"
   var packetScoreStatus = "No run"
-  var bandSleepImportStatus = "A aguardar sincronização"
+  var bandSleepImportStatus = "Awaiting sync"
   var externalSleepImportStatus = "External sleep imports disabled"
   var referenceRunStatusByFamily: [String: String] = [:]
   var primarySleepDetail: PrimarySleepDetail?

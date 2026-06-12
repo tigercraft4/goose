@@ -154,11 +154,11 @@ enum MoreStatusKind: String, CaseIterable {
 
   var title: String {
     switch self {
-    case .ready:       String(localized: "Pronto")
-    case .pending:     String(localized: "Pendente")
-    case .blocked:     String(localized: "Bloqueado")
-    case .unavailable: String(localized: "Indisponível")
-    case .stale:       String(localized: "Desatualizado")
+    case .ready:       String(localized: "Ready")
+    case .pending:     String(localized: "Pending")
+    case .blocked:     String(localized: "Blocked")
+    case .unavailable: String(localized: "Unavailable")
+    case .stale:       String(localized: "Stale")
     }
   }
 

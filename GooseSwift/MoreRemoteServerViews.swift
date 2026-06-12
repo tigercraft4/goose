@@ -162,15 +162,15 @@ struct MoreRemoteServerView: View {
           }
 
           // Row 5: Trust-chain import from server
-          LabeledContent("Import do servidor") {
+          LabeledContent("Server import") {
             HStack(spacing: 8) {
               if model.serverImportInProgress {
                 ProgressView().scaleEffect(0.7)
-                Text("A importar…").foregroundStyle(.secondary)
+                Text("Importing…").foregroundStyle(.secondary)
               } else if let count = model.serverImportLastFrameCount {
                 Text("\(count) frames").foregroundStyle(.green)
               } else {
-                Text("Não executado").foregroundStyle(.secondary)
+                Text("Not run").foregroundStyle(.secondary)
               }
               Button("Import") {
                 model.importHistoricalDataFromServer()

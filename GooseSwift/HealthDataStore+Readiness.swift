@@ -15,11 +15,11 @@ struct ReadinessResult {
 extension ReadinessResult {
   var levelLabel: String {
     switch level {
-    case "rundown":  return "Sobrecarregado"
-    case "strained": return "Tenso"
-    case "balanced": return "Equilibrado"
-    case "primed":   return "Pronto"
-    default:         return "Insuficiente"
+    case "rundown":  return "Run-down"
+    case "strained": return "Strained"
+    case "balanced": return "Balanced"
+    case "primed":   return "Primed"
+    default:         return "Insufficient data"
     }
   }
 
@@ -45,11 +45,11 @@ extension ReadinessResult {
 
   var acwrZoneLabel: String {
     switch acwrZone {
-    case "under_training": return "Sub-treino"
-    case "optimal":        return "Óptimo"
-    case "caution":        return "Atenção"
-    case "danger":         return "Risco"
-    default:               return "Desconhecido"
+    case "under_training": return "Under-training"
+    case "optimal":        return "Optimal"
+    case "caution":        return "Caution"
+    case "danger":         return "Danger"
+    default:               return "Unknown"
     }
   }
 }

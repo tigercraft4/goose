@@ -253,7 +253,7 @@ struct SleepStagingCard: View {
         Image(systemName: "moon.stars.fill")
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(palette.accent)
-        Text("Fases do Sono")
+        Text("Sleep Stages")
           .font(.headline.weight(.semibold))
           .foregroundStyle(palette.text)
         Spacer()
@@ -288,18 +288,18 @@ struct SleepStagingCard: View {
           .background(palette.separator.opacity(0.60))
 
         HStack(spacing: 0) {
-          SleepStagingMetricCell(palette: palette, label: "Eficiência", value: r.sleepEfficiencyText)
+          SleepStagingMetricCell(palette: palette, label: "Efficiency", value: r.sleepEfficiencyText)
           Divider().frame(maxHeight: 36).background(palette.separator.opacity(0.54))
-          SleepStagingMetricCell(palette: palette, label: "Início do sono", value: r.solText)
+          SleepStagingMetricCell(palette: palette, label: "Sleep onset", value: r.solText)
           Divider().frame(maxHeight: 36).background(palette.separator.opacity(0.54))
-          SleepStagingMetricCell(palette: palette, label: "Acordado após início", value: r.wasoText)
+          SleepStagingMetricCell(palette: palette, label: "Awake after onset", value: r.wasoText)
         }
 
         if !r.respAvailable {
           HStack(spacing: 6) {
             Image(systemName: "info.circle")
               .font(.caption.weight(.semibold))
-            Text("REM inferido sem dados respiratórios")
+            Text("REM inferred without respiratory data")
               .font(.caption.weight(.medium))
           }
           .foregroundStyle(palette.mutedText)
@@ -310,7 +310,7 @@ struct SleepStagingCard: View {
           Image(systemName: "moon.zzz")
             .font(.subheadline.weight(.medium))
             .foregroundStyle(palette.mutedText)
-          Text("Sem dados de staging — sem dados de acelerómetro ou sono")
+          Text("No staging data — no accelerometer or sleep data")
             .font(.subheadline.weight(.medium))
             .foregroundStyle(palette.secondaryText)
             .fixedSize(horizontal: false, vertical: true)

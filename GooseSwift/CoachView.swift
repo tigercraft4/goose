@@ -858,14 +858,14 @@ struct DailyJournalSheet: View {
         Spacer()
       }
       .padding(.top, 8)
-      .navigationTitle("Diário")
+      .navigationTitle("Journal")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
-          Button("Cancelar") { dismiss() }
+          Button("Cancel") { dismiss() }
         }
         ToolbarItem(placement: .topBarTrailing) {
-          Button("Guardar") { save() }
+          Button("Save") { save() }
             .font(.subheadline.weight(.semibold))
             .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
@@ -1001,7 +1001,7 @@ private struct CoachJournalCard: View {
           .background(iconTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
         VStack(alignment: .leading, spacing: 3) {
-          Text(entry == nil ? "Diário de Hoje" : "Diário de Hoje")
+          Text("Today's Journal")
             .font(.headline)
           if let entry {
             Text(entry.text.prefix(60))
@@ -1009,7 +1009,7 @@ private struct CoachJournalCard: View {
               .foregroundStyle(.secondary)
               .lineLimit(1)
           } else {
-            Text("Escrever nota do dia")
+            Text("Write today's note")
               .font(.caption)
               .foregroundStyle(.secondary)
           }

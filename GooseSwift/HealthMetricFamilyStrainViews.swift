@@ -244,7 +244,7 @@ struct HealthMetricFamilyView: View {
       }
       return [
         HealthSummaryRow("Primary sleep", value: store.bandSleepImportStatus, source: .unavailable(store.bandSleepImportStatus), systemImage: "bed.double"),
-        HealthSummaryRow("Timeline", value: "Sem timeline de sono", source: .unavailable(store.bandSleepImportStatus), systemImage: "timeline.selection"),
+        HealthSummaryRow("Timeline", value: "No sleep timeline", source: .unavailable(store.bandSleepImportStatus), systemImage: "timeline.selection"),
       ]
     case .recovery:
       return [
@@ -493,12 +493,12 @@ struct StrainV2OverviewPage: View {
               energyText: store.strainEnergyDisplayText(for: selectedDate)
             )
 
-            SleepV2SectionHeader(title: "Actividades", palette: palette)
+            SleepV2SectionHeader(title: "Activities", palette: palette)
             if store.exerciseSessions.isEmpty {
               StrainV2EmptyStateCard(
                 palette: palette,
                 systemImage: "figure.run.circle",
-                title: "Sem actividades",
+                title: "No activities",
                 message: store.strainEmptyStateSummary()
               )
             } else {
@@ -988,9 +988,9 @@ struct ExerciseSessionCard: View {
       }
 
       HStack(spacing: 0) {
-        ExerciseMetricCell(palette: palette, icon: "timer", label: "Duração", value: session.durationText)
+        ExerciseMetricCell(palette: palette, icon: "timer", label: "Duration", value: session.durationText)
         Divider().frame(maxHeight: 40).background(palette.separator.opacity(0.54))
-        ExerciseMetricCell(palette: palette, icon: "flame.fill", label: "Calorias", value: session.caloriesText)
+        ExerciseMetricCell(palette: palette, icon: "flame.fill", label: "Calories", value: session.caloriesText)
         Divider().frame(maxHeight: 40).background(palette.separator.opacity(0.54))
         ExerciseMetricCell(palette: palette, icon: "bolt.heart.fill", label: "Strain", value: session.strainText)
       }
@@ -1104,11 +1104,11 @@ struct IMUStepsComparisonCard: View {
           Image(systemName: "waveform")
             .font(.caption.weight(.semibold))
             .foregroundStyle(palette.accent)
-          Text("via acelerómetro")
+          Text("via accelerometer")
             .font(.caption.weight(.semibold))
             .foregroundStyle(palette.mutedText)
         }
-        Text("\(imuSteps) passos")
+        Text("\(imuSteps) steps")
           .font(.headline.weight(.semibold))
           .fontDesign(.rounded)
           .foregroundStyle(palette.text)
@@ -1121,7 +1121,7 @@ struct IMUStepsComparisonCard: View {
           Text("WHOOP")
             .font(.caption.weight(.semibold))
             .foregroundStyle(palette.mutedText)
-          Text("\(whoop) passos")
+          Text("\(whoop) steps")
             .font(.headline.weight(.semibold))
             .fontDesign(.rounded)
             .foregroundStyle(palette.text)

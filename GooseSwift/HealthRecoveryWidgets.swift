@@ -372,11 +372,11 @@ struct V24BiometricsCard: View {
         Image(systemName: "sensor.fill")
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(palette.accent)
-        Text("Biometria V24")
+        Text("V24 Biometrics")
           .font(.headline.weight(.semibold))
           .foregroundStyle(palette.text)
         Spacer()
-        Text("não calibrado")
+        Text("uncalibrated")
           .font(.caption2.weight(.semibold))
           .foregroundStyle(.white)
           .padding(.horizontal, 7)
@@ -396,7 +396,7 @@ struct V24BiometricsCard: View {
         V24MetricCell(
           palette: palette,
           systemImage: "thermometer.medium",
-          label: "Temperatura",
+          label: "Skin temp",
           value: result.skinTempText,
           tint: .orange
         )
@@ -464,10 +464,10 @@ struct ReadinessLevelCard: View {
         .frame(width: 36)
 
       VStack(alignment: .leading, spacing: 4) {
-        Text("Prontidão")
+        Text("Readiness")
           .font(.caption.weight(.semibold))
           .foregroundStyle(palette.mutedText)
-        Text(result?.levelLabel ?? "Insuficiente")
+        Text(result?.levelLabel ?? "Insufficient data")
           .font(.headline.weight(.semibold))
           .foregroundStyle(result != nil ? (result?.levelColor ?? palette.text) : palette.secondaryText)
           .lineLimit(1)
@@ -488,7 +488,7 @@ struct ReadinessLevelCard: View {
           }
         }
       } else {
-        Text("< 28 dias de dados")
+        Text("< 28 days of data")
           .font(.caption.weight(.medium))
           .foregroundStyle(palette.mutedText)
           .lineLimit(2)
