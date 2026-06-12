@@ -189,7 +189,6 @@ private struct CoachOverviewSnapshot {
   @MainActor
   static func make(healthStore: HealthDataStore, appModel: GooseAppModel) -> CoachOverviewSnapshot {
     let homeTip = CoachTipFactory.homeTip(healthStore: healthStore, appModel: appModel)
-    let readiness = healthStore.metricInputReadinessSummary()
     let inputNextAction = healthStore.metricInputReadinessNextActionSummary()
     let featureNextAction = healthStore.packetDerivedFeatureNextActionSummary()
     let scoreNextAction = healthStore.packetDerivedScoreNextActionSummary()
@@ -205,19 +204,25 @@ private struct CoachOverviewSnapshot {
       healthStore.snapshot(for: .stress),
     ]
 
+    // The headline card speaks user language (homeTip.message is derived
+    // from baseline progress); raw next_actions stay in the gap cards that
+    // link into the technical screens, and in the LLM prompt.
+    let progress = healthStore.baselineProgress()
+    var evidence: [String] = []
+    if progress.hasReport, progress.totalFamilies > 0 {
+      evidence.append(String(localized: "\(progress.readyFamilies) of \(progress.totalFamilies) scores ready"))
+    }
+    for snapshot in snapshots where snapshot.source.kind != .unavailable {
+      evidence.append("\(snapshot.title): \(snapshot.displayValue)")
+    }
+    if let bpm = appModel.ble.liveHeartRateBPM {
+      let liveText = "\(bpm) bpm"
+      evidence.append(String(localized: "Latest HR: \(liveText)"))
+    }
     let recommendation = CoachRecommendation(
-      title: primaryFocusTitle(inputNextAction: inputNextAction, scoreNextAction: scoreNextAction, snapshots: snapshots),
-      message: firstUseful(
-        inputNextAction,
-        scoreNextAction,
-        "Review the freshest local metrics before changing training or sleep plans."
-      ),
-      evidence: [
-        "Readiness: \(readiness)",
-        "Features: \(featureNextAction)",
-        "Scores: \(scoreNextAction)",
-        "Latest HR: \(liveHeartRate)",
-      ],
+      title: primaryFocusTitle(progress: progress, snapshots: snapshots),
+      message: homeTip.message,
+      evidence: Array(evidence.prefix(4)),
       prompt: homeTip.prompt
     )
 
@@ -275,20 +280,16 @@ private struct CoachOverviewSnapshot {
   }
 
   private static func primaryFocusTitle(
-    inputNextAction: String,
-    scoreNextAction: String,
+    progress: BaselineProgressModel,
     snapshots: [HealthMetricSnapshot]
   ) -> String {
     if snapshots.contains(where: { $0.source.kind == .unavailable }) {
-      return "Close the data gaps first"
+      return String(localized: "Close the data gaps first")
     }
-    if !inputNextAction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-      return "Refresh trusted inputs"
+    if !progress.hasReport || !progress.allReady {
+      return String(localized: "Keep collecting data")
     }
-    if !scoreNextAction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-      return "Refresh score outputs"
-    }
-    return "Review today"
+    return String(localized: "Review today")
   }
 
   @MainActor
@@ -392,11 +393,6 @@ private struct CoachOverviewSnapshot {
     )
   }
 
-  private static func firstUseful(_ values: String...) -> String {
-    values
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .first { !$0.isEmpty } ?? "Review the freshest local metrics before changing training or sleep plans."
-  }
 }
 
 private struct CoachRecommendation {
