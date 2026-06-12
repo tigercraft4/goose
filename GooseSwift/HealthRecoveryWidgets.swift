@@ -365,6 +365,7 @@ struct RecoveryV2TrendBand: View {
 struct V24BiometricsCard: View {
   let palette: SleepV2Palette
   let result: V24BiometricsResult
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
@@ -396,8 +397,8 @@ struct V24BiometricsCard: View {
         V24MetricCell(
           palette: palette,
           systemImage: "thermometer.medium",
-          label: "Temperatura",
-          value: result.skinTempText,
+          label: String(localized: "Skin temp"),
+          value: result.skinTempText(imperial: TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw)),
           tint: .orange
         )
         Divider().frame(maxHeight: 48).background(palette.separator.opacity(0.54))

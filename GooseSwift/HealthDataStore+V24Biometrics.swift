@@ -17,9 +17,8 @@ extension V24BiometricsResult {
     return String(format: "%.1f%%", v)
   }
 
-  var skinTempText: String {
-    guard let v = skinTempCelsius else { return "--" }
-    return String(format: "%.1f °C", v)
+  func skinTempText(imperial: Bool) -> String {
+    TemperatureFormatting.absoluteText(celsius: skinTempCelsius, imperial: imperial)
   }
 
   var respRateText: String {

@@ -204,6 +204,7 @@ struct CoachSleepRouteView: View {
 
 struct CoachRecoveryRouteView: View {
   var healthStore: HealthDataStore
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
 
   private var r: RecoveryV1Result? { healthStore.recoveryV1Result }
 
@@ -229,7 +230,12 @@ struct CoachRecoveryRouteView: View {
           CoachInfoRow(label: "HRV (SDNN)", value: healthStore.hkHRVSDNNMs.map { String(format: "%.0f ms", $0) } ?? "—")
           CoachInfoRow(label: "RHR", value: healthStore.hkRestingHR.map { String(format: "%.0f bpm", $0) } ?? "—")
           CoachInfoRow(label: "Resp. Rate", value: healthStore.hkRespiratoryRate.map { String(format: "%.1f rpm", $0) } ?? "—")
-          CoachInfoRow(label: "Temp. pele Δ", value: healthStore.hkSkinTempDeltaC.map { String(format: "%+.2f °C", $0) } ?? "—")
+          CoachInfoRow(
+            label: String(localized: "Skin temp Δ"),
+            value: healthStore.hkSkinTempDeltaC.map {
+              TemperatureFormatting.deltaText(celsiusDelta: $0, imperial: TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw))
+            } ?? "—"
+          )
         }
 
         if let r {

@@ -180,13 +180,15 @@ extension HealthDataStore {
           metricName: "oxygen saturation"
         )
       case "recovery-temp-trend":
+        let imperial = TemperatureFormatting.preferredIsImperial
         return dailyRecoveryMetricSnapshot(
           base: snapshot,
           valueKey: "skin_temperature_delta_c",
-          unit: "C",
+          unit: TemperatureFormatting.unitSuffix(imperial: imperial),
           fractionDigits: 1,
           metricName: "skin temperature delta",
-          signed: true
+          signed: true,
+          valueTransform: imperial ? { TemperatureFormatting.deltaValue(celsiusDelta: $0, imperial: true) } : nil
         )
       default:
         return nil
@@ -200,16 +202,27 @@ extension HealthDataStore {
     unit: String,
     fractionDigits: Int,
     metricName: String,
-    signed: Bool = false
+    signed: Bool = false,
+    valueTransform: ((Double) -> Double)? = nil
   ) -> HealthMetricSnapshot? {
     let metrics = dailyRecoveryMetricsWithValue(valueKey)
-    let rows = Self.dailyRecoveryTrendRows(from: metrics, valueKey: valueKey)
+    var rows = Self.dailyRecoveryTrendRows(from: metrics, valueKey: valueKey)
     guard let metric = Self.preferredDailyRecoveryMetric(from: metrics, valueKey: valueKey) else {
       return nil
     }
+    if let valueTransform {
+      rows = rows.map { row in
+        var transformed = row
+        if let value = Self.doubleValue(row[valueKey]) {
+          transformed[valueKey] = valueTransform(value)
+        }
+        return transformed
+      }
+    }
+    let displayValue = Self.doubleValue(metric[valueKey]).map { valueTransform?($0) ?? $0 }
     let valueText = signed
-      ? Self.signedNumberText(metric[valueKey], fractionDigits: fractionDigits)
-      : Self.numberText(metric[valueKey], fractionDigits: fractionDigits)
+      ? Self.signedNumberText(displayValue, fractionDigits: fractionDigits)
+      : Self.numberText(displayValue, fractionDigits: fractionDigits)
     guard let valueText else {
       return nil
     }

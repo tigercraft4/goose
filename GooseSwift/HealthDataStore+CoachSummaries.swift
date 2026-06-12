@@ -621,19 +621,22 @@ extension HealthDataStore {
     guard !usesPreviewPacketData else {
       return "--"
     }
+    let imperial = TemperatureFormatting.preferredIsImperial
+    let suffix = TemperatureFormatting.unitSuffix(imperial: imperial)
     if let metric = preferredDailyRecoveryMetric(valueKey: "skin_temperature_delta_c", for: date, calendar: calendar),
-       let text = Self.signedNumberText(metric["skin_temperature_delta_c"], fractionDigits: 1) {
-      return "\(text) C"
+       let celsius = Self.doubleValue(metric["skin_temperature_delta_c"]),
+       let text = Self.signedNumberText(TemperatureFormatting.deltaValue(celsiusDelta: celsius, imperial: imperial), fractionDigits: 1) {
+      return "\(text) \(suffix)"
     }
     guard calendar.isDate(calendar.startOfDay(for: date), inSameDayAs: calendar.startOfDay(for: Date())) else {
       return "--"
     }
     let value = recoveryProvidedVitalsValue("skin_temp_delta_c") ?? 0
-    if value != 0, let text = Self.signedNumberText(value, fractionDigits: 1) {
-      return "\(text) C"
+    if value != 0, let text = Self.signedNumberText(TemperatureFormatting.deltaValue(celsiusDelta: value, imperial: imperial), fractionDigits: 1) {
+      return "\(text) \(suffix)"
     }
-    if let v = hkSkinTempDeltaC, v != 0, let text = Self.signedNumberText(v, fractionDigits: 1) {
-      return "\(text) C"
+    if let v = hkSkinTempDeltaC, v != 0, let text = Self.signedNumberText(TemperatureFormatting.deltaValue(celsiusDelta: v, imperial: imperial), fractionDigits: 1) {
+      return "\(text) \(suffix)"
     }
     return "--"
   }

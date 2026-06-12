@@ -102,13 +102,15 @@ extension HealthDataStore {
   }
 
   func wristTemperatureHealthMonitorSnapshot(base snapshot: HealthMetricSnapshot) -> HealthMetricSnapshot {
+    let imperial = TemperatureFormatting.preferredIsImperial
     if let stored = dailyRecoveryMetricSnapshot(
       base: snapshot,
       valueKey: "skin_temperature_delta_c",
-      unit: "C",
+      unit: TemperatureFormatting.unitSuffix(imperial: imperial),
       fractionDigits: 1,
       metricName: "skin temperature delta",
-      signed: true
+      signed: true,
+      valueTransform: imperial ? { TemperatureFormatting.deltaValue(celsiusDelta: $0, imperial: true) } : nil
     ) {
       return stored
     }
