@@ -158,7 +158,7 @@ struct SleepV2TrendSheet: View {
                   .foregroundStyle(palette.secondaryText)
               }
               Spacer(minLength: 8)
-              Text(snapshot.status)
+              Text(snapshot.status.localizedHealthStatus)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(snapshot.tint)
                 .padding(.horizontal, 10)

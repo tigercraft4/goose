@@ -7,6 +7,21 @@ struct HealthDashboardStatusHeader: View {
   let catalogStatus: String
   let usesSampleData: Bool
 
+  // The raw catalogStatus is engineering text ("Bridge catalog loaded");
+  // it stays inspectable under More → Developer → Debug → Data Provenance.
+  private var friendlyStatus: String {
+    if usesSampleData {
+      return String(localized: "Showing sample data for preview")
+    }
+    if catalogStatus.localizedCaseInsensitiveContains("unavailable") {
+      return String(localized: "Metrics engine unavailable — see More → Developer → Debug")
+    }
+    if catalogStatus.localizedCaseInsensitiveContains("loaded") && !catalogStatus.localizedCaseInsensitiveContains("not loaded") {
+      return String(localized: "Computed on this iPhone from your WHOOP data")
+    }
+    return String(localized: "Preparing your metrics...")
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack(spacing: 10) {
@@ -16,9 +31,9 @@ struct HealthDashboardStatusHeader: View {
           .frame(width: 30, height: 30)
           .background((usesSampleData ? Color.orange : Color.green).opacity(0.14), in: Circle())
         VStack(alignment: .leading, spacing: 2) {
-          Text("Health Sources")
+          Text("Your Health Data")
             .font(.headline.weight(.semibold))
-          Text(catalogStatus)
+          Text(friendlyStatus)
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(1)
@@ -86,7 +101,7 @@ struct HealthTodayFocusCard: View {
           .foregroundStyle(.primary)
           .lineLimit(1)
           .minimumScaleFactor(0.62)
-        Text(snapshot.status)
+        Text(snapshot.status.localizedHealthStatus)
           .font(.caption.weight(.semibold))
           .foregroundStyle(snapshot.tint)
           .lineLimit(1)
@@ -239,7 +254,7 @@ struct HealthVitalsPreviewCard: View {
           .foregroundStyle(.primary)
           .lineLimit(1)
           .minimumScaleFactor(0.7)
-        Text(snapshot.status)
+        Text(snapshot.status.localizedHealthStatus)
           .font(.caption2)
           .foregroundStyle(.secondary)
           .lineLimit(1)
@@ -285,7 +300,7 @@ struct HealthRouteShortcutCard: View {
         Text(snapshot.title)
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(.primary)
-        Text("\(snapshot.displayValue) | \(snapshot.status)")
+        Text("\(snapshot.displayValue) | \(snapshot.status.localizedHealthStatus)")
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(1)
@@ -440,14 +455,12 @@ struct HealthMetricCard: View {
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(.primary)
           .lineLimit(1)
-        Text("\(snapshot.status) | \(snapshot.freshness)")
+        // Provenance identifiers moved off the card into the trend
+        // sheet's Details section — cards stay in user language.
+        Text("\(snapshot.status.localizedHealthStatus) | \(snapshot.freshness)")
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(2)
-        Text(snapshot.provenance)
-          .font(.caption2)
-          .foregroundStyle(.tertiary)
-          .lineLimit(1)
       }
     }
     .frame(maxWidth: .infinity, minHeight: 144, alignment: .topLeading)

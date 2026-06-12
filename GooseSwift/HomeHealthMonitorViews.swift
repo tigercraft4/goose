@@ -139,7 +139,7 @@ struct HomeHealthMetricCard: View {
           .lineLimit(1)
           .minimumScaleFactor(0.65)
 
-        Label(snapshot.status, systemImage: statusImage)
+        Label(snapshot.status.localizedHealthStatus, systemImage: statusImage)
           .font(.caption.weight(.bold))
           .foregroundStyle(snapshot.tint)
           .lineLimit(1)

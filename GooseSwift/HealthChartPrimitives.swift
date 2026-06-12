@@ -29,12 +29,24 @@ struct HealthSourceBadge: View {
   let source: HealthDataSource
 
   var body: some View {
-    Text(source.kind.rawValue)
+    Text(label)
       .font(.caption2.weight(.bold))
       .foregroundStyle(color)
       .padding(.horizontal, 7)
       .padding(.vertical, 4)
       .background(color.opacity(0.12), in: Capsule())
+  }
+
+  // Kind raw values ("Bridge", "Local") are internal vocabulary; badges
+  // speak user language and the exact source stays in the trend sheet
+  // Details section and the developer screens.
+  private var label: String {
+    switch source.kind {
+    case .bridge: String(localized: "WHOOP")
+    case .local: String(localized: "Phone")
+    case .live: String(localized: "Live")
+    case .unavailable: String(localized: "No data")
+    }
   }
 
   private var color: Color {

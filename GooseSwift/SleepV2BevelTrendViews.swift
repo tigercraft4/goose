@@ -175,11 +175,11 @@ struct SleepV2BevelTrendSheet: View {
             .font(.callout.weight(.semibold))
             .fontDesign(.rounded)
             .foregroundStyle(palette.text)
-          Text(snapshot.status)
+          Text(snapshot.status.localizedHealthStatus)
             .font(.caption.weight(.semibold))
             .foregroundStyle(statusColor(for: snapshot))
         } else {
-          Text(snapshot.status)
+          Text(snapshot.status.localizedHealthStatus)
             .font(.callout.weight(.semibold))
             .foregroundStyle(statusColor(for: snapshot))
           HStack(spacing: 6) {

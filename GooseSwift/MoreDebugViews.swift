@@ -4,6 +4,7 @@ struct MoreDebugView: View {
   @Environment(GooseAppModel.self) private var model
   @EnvironmentObject private var packetMonitor: PacketMonitorModel
   @ObservedObject var store: MoreDataStore
+  var healthStore: HealthDataStore
   @AppStorage(OnboardingStorage.onboardingComplete) private var onboardingComplete = false
   @AppStorage(OnboardingStorage.onboardingRedoRequested) private var onboardingRedoRequested = false
   @State private var showDestructiveConfirmation = false
@@ -21,6 +22,37 @@ struct MoreDebugView: View {
           store.runFrameParseProbe()
         } label: {
           Label("Run Parser Probe", systemImage: "play.circle")
+        }
+      }
+
+      // Relocated from the Home dashboard (HOME-03 evidence footer): the
+      // provenance details stay inspectable here without crowding Home.
+      Section("Data Provenance") {
+        MoreInfoRow(
+          title: "Catalog",
+          value: healthStore.catalogStatus,
+          systemImage: "books.vertical",
+          status: healthStore.catalogStatus.contains("loaded") ? .ready : .pending
+        )
+        MoreInfoRow(
+          title: "Store",
+          value: URL(fileURLWithPath: healthStore.databasePath).lastPathComponent,
+          systemImage: "externaldrive",
+          status: .ready
+        )
+        MoreInfoRow(
+          title: "Mode",
+          value: healthStore.catalogSource.kind.rawValue,
+          systemImage: "switch.2",
+          status: healthStore.usesSampleData ? .stale : .ready
+        )
+        ForEach(healthStore.selectedAlgorithmByFamily.keys.sorted(), id: \.self) { family in
+          MoreInfoRow(
+            title: family.capitalized,
+            value: healthStore.selectedAlgorithmByFamily[family] ?? "—",
+            systemImage: "function",
+            status: .ready
+          )
         }
       }
 

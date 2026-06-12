@@ -207,10 +207,12 @@ extension HealthDataStore {
         return fallback
       }
       let packetCount = packetEvidenceFrameCount()
+      // firstPacketAction text is written for engineers; the raw action
+      // stays on the Packet Inputs screen, not in the card freshness slot.
       return unavailablePacketSnapshot(
         base: snapshot,
         status: packetCount > 0 ? "Field unresolved" : "No packet data",
-        freshness: firstPacketAction(in: report) ?? packetCountText(packetCount) ?? "No RHR",
+        freshness: packetCountText(packetCount) ?? "No RHR",
         provenance: restingHeartRateFeatureProvenanceSummary(),
         sourceDetail: "resting HR packet feature unavailable"
       )
@@ -395,7 +397,7 @@ extension HealthDataStore {
       return unavailablePacketSnapshot(
         base: snapshot,
         status: "Validation pending",
-        freshness: firstPacketAction(in: report) ?? packetCountText(packetCount) ?? "HRV unverified",
+        freshness: packetCountText(packetCount) ?? "HRV unverified",
         provenance: hrvFeatureProvenanceSummary(),
         sourceDetail: "HRV requires validated beat-interval semantics before display"
       )
@@ -419,7 +421,7 @@ extension HealthDataStore {
       return unavailablePacketSnapshot(
         base: snapshot,
         status: packetCount > 0 ? "Field unresolved" : "No packet data",
-        freshness: firstPacketAction(in: report) ?? packetCountText(packetCount) ?? "No HRV",
+        freshness: packetCountText(packetCount) ?? "No HRV",
         provenance: hrvFeatureProvenanceSummary(),
         sourceDetail: "validated HRV packet feature unavailable"
       )

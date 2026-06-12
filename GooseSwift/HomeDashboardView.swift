@@ -69,14 +69,6 @@ struct HomeDashboardView: View {
           openCalibration: { router.openMore(.algorithms) }
         )
 
-        HomeEvidenceFooter(
-          rustStatus: model.rustStatus,
-          databasePath: healthStore.databasePath,
-          catalogSource: healthStore.catalogSource,
-          algorithmsByFamily: healthStore.selectedAlgorithmByFamily,
-          onTap: { router.openMore(.debug) }
-        )
-
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 18)
@@ -416,75 +408,6 @@ private struct HomeToolButton: View {
   }
 }
 
-// MARK: - HOME-03: Evidence Footer
-
-private struct HomeEvidenceFooter: View {
-  let rustStatus: String
-  let databasePath: String
-  let catalogSource: HealthDataSource
-  let algorithmsByFamily: [String: String]
-  let onTap: () -> Void
-
-  private var coreVersion: String {
-    if let range = rustStatus.range(of: "v\\d+\\.\\d+\\.\\d+", options: .regularExpression) {
-      return String(rustStatus[range])
-    }
-    return rustStatus.isEmpty ? "—" : "core"
-  }
-
-  private var storeFilename: String {
-    URL(fileURLWithPath: databasePath).lastPathComponent
-  }
-
-  private var dataMode: String { catalogSource.kind.rawValue }
-
-  var body: some View {
-    Button(action: onTap) {
-      VStack(alignment: .leading, spacing: 6) {
-        HStack {
-          Text("DATA PROVENANCE")
-            .font(.system(size: 10, weight: .black))
-            .foregroundStyle(.secondary)
-          Spacer()
-          Image(systemName: "chevron.right")
-            .font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(.tertiary)
-        }
-
-        HomeEvidenceRow(label: "Core", value: coreVersion)
-        HomeEvidenceRow(label: "Store", value: storeFilename)
-        HomeEvidenceRow(label: "Mode", value: dataMode)
-
-        if !algorithmsByFamily.isEmpty {
-          Divider().opacity(0.5)
-          ForEach(algorithmsByFamily.keys.sorted(), id: \.self) { family in
-            HomeEvidenceRow(label: family.capitalized, value: algorithmsByFamily[family] ?? "—")
-          }
-        }
-      }
-      .padding(12)
-      .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-    }
-    .buttonStyle(.plain)
-  }
-}
-
-private struct HomeEvidenceRow: View {
-  let label: String
-  let value: String
-
-  var body: some View {
-    HStack {
-      Text(label)
-        .font(.system(size: 11, weight: .medium))
-        .foregroundStyle(.secondary)
-      Spacer()
-      Text(value)
-        .font(.system(size: 11, weight: .semibold, design: .monospaced))
-        .foregroundStyle(.primary)
-        .lineLimit(1)
-        .minimumScaleFactor(0.7)
-    }
-  }
-}
+// HOME-03 (evidence footer) moved to More → Developer → Debug as the
+// "Data Provenance" section — see MoreDebugViews.swift.
 

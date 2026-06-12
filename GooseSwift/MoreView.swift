@@ -158,7 +158,7 @@ struct MoreView: View {
         router.openHealth(.algorithms)
       }
     case .debug:
-      MoreDebugView(store: store)
+      MoreDebugView(store: store, healthStore: healthStore)
     case .privacy:
       MorePrivacyView(store: store)
     case .remoteServer:

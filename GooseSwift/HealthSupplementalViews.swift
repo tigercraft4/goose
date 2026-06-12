@@ -186,11 +186,11 @@ struct HealthHero: View {
           .font(.system(size: 36, weight: .bold))
           .lineLimit(1)
           .minimumScaleFactor(0.7)
-        Text(snapshot.status)
+        Text(snapshot.status.localizedHealthStatus)
           .font(.headline)
           .foregroundStyle(snapshot.tint)
       }
-      Text("\(snapshot.freshness) | \(snapshot.provenance)")
+      Text(snapshot.freshness)
         .font(.caption)
         .foregroundStyle(.secondary)
     }
@@ -320,16 +320,13 @@ struct HealthTrendSheet: View {
               Text(snapshot.displayValue)
                 .font(.system(size: 34, weight: .bold))
               Spacer()
-              Text(snapshot.status)
+              Text(snapshot.status.localizedHealthStatus)
                 .font(.headline)
                 .foregroundStyle(snapshot.tint)
             }
             Text(snapshot.trend.rangeLabel)
               .font(.subheadline)
               .foregroundStyle(.secondary)
-            Text(snapshot.source.label)
-              .font(.caption)
-              .foregroundStyle(.tertiary)
           }
         }
 
@@ -361,6 +358,16 @@ struct HealthTrendSheet: View {
             Label(resource, systemImage: "book")
           }
         }
+
+        // The technical identifiers that used to sit on the metric cards
+        // live here: per-metric source, pipeline stage, and provenance.
+        Section("Details") {
+          VStack(alignment: .leading, spacing: 8) {
+            HealthTrendDetailRow(label: String(localized: "Source"), value: snapshot.source.label)
+            HealthTrendDetailRow(label: String(localized: "Pipeline status"), value: snapshot.status)
+            HealthTrendDetailRow(label: String(localized: "Computed by"), value: snapshot.provenance)
+          }
+        }
       }
       .gooseListBackground()
       .navigationTitle(snapshot.title)
@@ -373,6 +380,23 @@ struct HealthTrendSheet: View {
           }
         }
       }
+    }
+  }
+}
+
+struct HealthTrendDetailRow: View {
+  let label: String
+  let value: String
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      Text(label)
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(.secondary)
+      Text(value)
+        .font(.caption.monospaced())
+        .foregroundStyle(.primary)
+        .fixedSize(horizontal: false, vertical: true)
     }
   }
 }

@@ -89,7 +89,7 @@ struct HomeTimelineSection: View {
   }
 
   private func summary(for snapshot: HealthMetricSnapshot) -> String {
-    "\(snapshot.displayValue) - \(snapshot.status)"
+    "\(snapshot.displayValue) - \(snapshot.status.localizedHealthStatus)"
   }
 
   private func activitySummary(for item: ActivityTimelineItem) -> String {

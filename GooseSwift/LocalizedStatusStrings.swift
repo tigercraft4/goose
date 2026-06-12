@@ -203,6 +203,29 @@ extension String {
     default: return self
     }
   }
+
+  // MARK: - Health Metric Status (HealthMetricSnapshot.status)
+  // Raw values stay pipeline-stage English in HealthDataStore ("Packet-derived",
+  // "Field unresolved", ...) so debug screens and Coach prompts keep the exact
+  // state; user-facing cards display this friendly mapping instead.
+
+  var localizedHealthStatus: String {
+    switch self {
+    case "Packet-derived":     return String(localized: "From your WHOOP")
+    case "Field unresolved":   return String(localized: "Waiting for data")
+    case "No packet data":     return String(localized: "Waiting for data")
+    case "Extractor pending":  return String(localized: "Getting ready")
+    case "Run pending":        return String(localized: "Getting ready")
+    case "No run":             return String(localized: "Getting ready")
+    case "Validation pending": return String(localized: "Verifying accuracy")
+    case "Semantics pending":  return String(localized: "Verifying accuracy")
+    case "PIP candidate":      return String(localized: "Verifying accuracy")
+    case "Local daily estimate": return String(localized: "Estimated on this iPhone")
+    case "Unavailable":        return String(localized: "Unavailable")
+    case "No data":            return String(localized: "No data")
+    default: return self
+    }
+  }
 }
 
 
