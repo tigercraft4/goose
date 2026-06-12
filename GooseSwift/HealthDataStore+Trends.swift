@@ -181,6 +181,9 @@ extension HealthDataStore {
         )
       case "recovery-temp-trend":
         let imperial = TemperatureFormatting.preferredIsImperial
+        let valueTransform: ((Double) -> Double)? = imperial
+          ? { TemperatureFormatting.deltaValue(celsiusDelta: $0, imperial: true) }
+          : nil
         return dailyRecoveryMetricSnapshot(
           base: snapshot,
           valueKey: "skin_temperature_delta_c",
@@ -188,7 +191,7 @@ extension HealthDataStore {
           fractionDigits: 1,
           metricName: "skin temperature delta",
           signed: true,
-          valueTransform: imperial ? { TemperatureFormatting.deltaValue(celsiusDelta: $0, imperial: true) } : nil
+          valueTransform: valueTransform
         )
       default:
         return nil
