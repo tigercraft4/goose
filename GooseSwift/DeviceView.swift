@@ -39,6 +39,10 @@ private struct DeviceContentView: View {
             .padding(.bottom, 46)
 
           if selectedPanel == .status {
+            if ble.isHistoricalSyncing {
+              DeviceSyncProgressCard(ble: ble)
+                .padding(.bottom, 30)
+            }
             DeviceImageAndBattery(
               batteryPercent: ble.batteryLevelPercent,
               isCharging: ble.batteryIsCharging == true
@@ -417,6 +421,54 @@ private struct DeviceDetailStack<Content: View>: View {
     VStack(spacing: 0) {
       content
     }
+  }
+}
+
+private struct DeviceSyncProgressCard: View {
+  var ble: GooseBLEClient
+
+  private var percentText: String? {
+    ble.historicalSyncFraction.map { "\(Int(($0 * 100).rounded()))%" }
+  }
+
+  var body: some View {
+    HStack(spacing: 16) {
+      ZStack {
+        SyncProgressRing(fraction: ble.historicalSyncFraction, lineWidth: 6, tint: .blue)
+        if let percentText {
+          Text(percentText)
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(devicePrimaryText)
+            .minimumScaleFactor(0.7)
+        } else {
+          Image(systemName: "arrow.triangle.2.circlepath")
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.blue)
+        }
+      }
+      .frame(width: 58, height: 58)
+
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Syncing your strap")
+          .font(.headline)
+          .foregroundStyle(devicePrimaryText)
+        Text("\(ble.historicalPacketCount) packets received")
+          .font(.caption)
+          .monospacedDigit()
+          .foregroundStyle(.secondary)
+        Text(ble.historicalSyncStatus.localizedHistoricalSyncStatus)
+          .font(.caption2)
+          .foregroundStyle(.tertiary)
+      }
+
+      Spacer(minLength: 0)
+    }
+    .padding(16)
+    .background(controlBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    .accessibilityElement(children: .combine)
+    .accessibilityLabel(Text("Sync in progress"))
+    .accessibilityValue(Text(percentText ?? "\(ble.historicalPacketCount) packets received"))
   }
 }
 

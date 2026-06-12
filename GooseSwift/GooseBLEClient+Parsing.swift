@@ -690,6 +690,13 @@ extension GooseBLEClient {
       pagesBehind = nil
     }
 
+    // Seed the determinate sync-progress total. Gen4 range responses use a
+    // different body layout, so the V5 page words are not trusted there.
+    if status == "success", activeDeviceGeneration != .gen4,
+       let pagesBehind, pagesBehind > 0, isHistoricalSyncing {
+      historicalSyncPagesTotal = Int(pagesBehind)
+    }
+
     onHistoricalRangeTelemetry?(
       GooseHistoricalRangeTelemetry(
         capturedAt: Date(),

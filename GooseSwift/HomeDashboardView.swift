@@ -278,6 +278,14 @@ private struct HomeDeviceStatusCard: View {
     return rel.localizedString(for: date, relativeTo: Date()).capitalized
   }
 
+  private var syncProgressText: String {
+    if let fraction = ble.historicalSyncFraction {
+      let percentText = "\(Int((fraction * 100).rounded()))%"
+      return String(localized: "Syncing \(percentText) — \(ble.historicalPacketCount) packets")
+    }
+    return String(localized: "Syncing — \(ble.historicalPacketCount) packets")
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
@@ -291,6 +299,18 @@ private struct HomeDeviceStatusCard: View {
         Text(ble.connectionState.localizedConnectionState)
           .font(.caption.weight(.medium))
           .foregroundStyle(stateColor)
+      }
+
+      if ble.isHistoricalSyncing {
+        HStack(spacing: 8) {
+          SyncProgressRing(fraction: ble.historicalSyncFraction, lineWidth: 3, tint: .blue)
+            .frame(width: 18, height: 18)
+          Text(syncProgressText)
+            .font(.caption.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+        }
       }
 
       HStack(spacing: 20) {

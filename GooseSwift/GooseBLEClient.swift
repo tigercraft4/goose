@@ -44,6 +44,23 @@ import OSLog
   var softwareRevision: String?
   var manufacturerName: String?
   var historicalPacketCount = 0
+  // Determinate sync progress: total pages comes from the GET_DATA_RANGE
+  // response (V5 page words), bursts advance one per history_end metadata.
+  // Gen4 range responses don't expose a verified total, so the fraction is
+  // nil there and the UI falls back to an indeterminate ring.
+  var historicalSyncPagesTotal: Int?
+  var historicalSyncBurstsCompleted = 0
+  var historicalSyncFraction: Double? {
+    guard isHistoricalSyncing else {
+      return historicalSyncStatus == "synced" ? 1 : nil
+    }
+    guard let total = historicalSyncPagesTotal, total > 0 else {
+      return nil
+    }
+    // Burst-to-page mapping is approximate; cap below 1 so the ring only
+    // closes on the terminal synced state.
+    return min(Double(historicalSyncBurstsCompleted) / Double(total), 0.97)
+  }
   var lastHistoricalSyncCompletedAt: Date?
   var lastHistoricalRangeCommandStatus = "No GET_DATA_RANGE response"
   var alarmCommandStatus = "No alarm command sent"

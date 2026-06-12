@@ -34,6 +34,8 @@ extension GooseBLEClient {
     historicalManager.historicalRangePollOnly = rangeOnly
     historicalManager.historicalDataResultAckEnabled = acknowledgeHistoricalDataResult
     historicalManager.historicalPacketsReceivedThisSync = 0
+    historicalSyncPagesTotal = nil
+    historicalSyncBurstsCompleted = 0
     publishHistoricalPacketCountIfNeeded(force: true)
     historicalManager.lastHistoricalPacketCountPublishedAt = Date.distantPast
     historicalManager.lastHistoricalSyncProgressCallbackAt = Date.distantPast
