@@ -141,7 +141,7 @@ struct HomeHealthMetricCard: View {
 
         Label(snapshot.status, systemImage: statusImage)
           .font(.caption.weight(.bold))
-          .foregroundStyle(snapshot.tint)
+          .foregroundStyle(statusColor)
           .lineLimit(1)
           .minimumScaleFactor(0.75)
       }
@@ -162,8 +162,25 @@ struct HomeHealthMetricCard: View {
     .cardSurface(tint: snapshot.tint)
   }
 
+  // A checkmark is only earned by a real value; pending/empty states show a
+  // neutral collecting glyph instead of a green check next to "No data".
+  private var hasMetricValue: Bool {
+    let value = snapshot.value.trimmingCharacters(in: .whitespaces)
+    return !(value.isEmpty || value == "--" || value == "—")
+  }
+
   private var statusImage: String {
-    snapshot.status.localizedCaseInsensitiveContains("unavailable") ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+    if snapshot.status.localizedCaseInsensitiveContains("unavailable") {
+      return "exclamationmark.circle.fill"
+    }
+    return hasMetricValue ? "checkmark.circle.fill" : "hourglass.circle.fill"
+  }
+
+  private var statusColor: Color {
+    if snapshot.status.localizedCaseInsensitiveContains("unavailable") {
+      return snapshot.tint
+    }
+    return hasMetricValue ? snapshot.tint : .secondary
   }
 }
 
