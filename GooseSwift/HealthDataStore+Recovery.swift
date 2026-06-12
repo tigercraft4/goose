@@ -44,8 +44,8 @@ extension HealthDataStore {
 
   var recoveryV1TrustLabel: String? {
     switch recoveryV1Result?.trustLevel {
-    case "calibrating": return "Calibrating"
-    case "provisional": return "Provisional"
+    case "calibrating": return String(localized: "Calibrating")
+    case "provisional": return String(localized: "Provisional")
     default: return nil
     }
   }

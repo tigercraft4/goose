@@ -41,7 +41,9 @@ extension SleepStagingResult {
   }
 
   var stagingMethodLabel: String {
-    stagingMethod.contains("no_imu") ? "no accelerometer" : "4-class accelerometer"
+    stagingMethod.contains("no_imu")
+      ? String(localized: "no accelerometer")
+      : String(localized: "4-class accelerometer")
   }
 }
 

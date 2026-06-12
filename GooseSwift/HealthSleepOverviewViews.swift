@@ -288,11 +288,11 @@ struct SleepStagingCard: View {
           .background(palette.separator.opacity(0.60))
 
         HStack(spacing: 0) {
-          SleepStagingMetricCell(palette: palette, label: "Efficiency", value: r.sleepEfficiencyText)
+          SleepStagingMetricCell(palette: palette, label: String(localized: "Efficiency"), value: r.sleepEfficiencyText)
           Divider().frame(maxHeight: 36).background(palette.separator.opacity(0.54))
-          SleepStagingMetricCell(palette: palette, label: "Sleep onset", value: r.solText)
+          SleepStagingMetricCell(palette: palette, label: String(localized: "Sleep onset"), value: r.solText)
           Divider().frame(maxHeight: 36).background(palette.separator.opacity(0.54))
-          SleepStagingMetricCell(palette: palette, label: "Awake after onset", value: r.wasoText)
+          SleepStagingMetricCell(palette: palette, label: String(localized: "Awake after onset"), value: r.wasoText)
         }
 
         if !r.respAvailable {

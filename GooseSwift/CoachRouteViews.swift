@@ -92,29 +92,31 @@ struct CoachSleepRouteView: View {
         CoachRouteHeader(
           systemImage: "moon.zzz",
           title: "Sleep Coach",
-          subtitle: sleep == nil ? "No sleep data for today" : "Last night's analysis",
+          subtitle: sleep == nil
+            ? String(localized: "No sleep data for today")
+            : String(localized: "Last night's analysis"),
           tint: .indigo
         )
 
-        CoachInfoGroup(title: "SCHEDULE") {
+        CoachInfoGroup(title: String(localized: "SCHEDULE")) {
           CoachInfoRow(label: "Wind-down", value: windDownTime)
-          CoachInfoRow(label: "Bedtime", value: sleep?.startLabel ?? "—")
-          CoachInfoRow(label: "Wake", value: sleep?.endLabel ?? "—")
-          CoachInfoRow(label: "Duration", value: sleep?.durationText ?? "—")
+          CoachInfoRow(label: String(localized: "Bedtime"), value: sleep?.startLabel ?? "—")
+          CoachInfoRow(label: String(localized: "Wake"), value: sleep?.endLabel ?? "—")
+          CoachInfoRow(label: String(localized: "Duration"), value: sleep?.durationText ?? "—")
         }
 
-        CoachInfoGroup(title: "QUALITY") {
+        CoachInfoGroup(title: String(localized: "QUALITY")) {
           CoachInfoRow(label: "Score", value: sleep?.scoreText ?? "—")
-          CoachInfoRow(label: "Quality", value: sleep?.qualityText ?? "—")
-          CoachInfoRow(label: "Time in bed", value: sleep?.timeInBedText ?? "—")
+          CoachInfoRow(label: String(localized: "Quality"), value: sleep?.qualityText ?? "—")
+          CoachInfoRow(label: String(localized: "Time in bed"), value: sleep?.timeInBedText ?? "—")
           CoachInfoRow(label: "WASO", value: sleep?.wasoText ?? "—")
         }
 
         if let sleep {
-          CoachInfoGroup(title: "SLEEP DEBT") {
-            CoachInfoRow(label: "Goal", value: "8h 00m")
-            CoachInfoRow(label: "Actual", value: sleep.durationText)
-            CoachInfoRow(label: "Debt", value: sleepDebt(actual: sleep.durationText))
+          CoachInfoGroup(title: String(localized: "SLEEP DEBT")) {
+            CoachInfoRow(label: String(localized: "Goal"), value: "8h 00m")
+            CoachInfoRow(label: String(localized: "Actual"), value: sleep.durationText)
+            CoachInfoRow(label: String(localized: "Debt"), value: sleepDebt(actual: sleep.durationText))
           }
         }
 
@@ -133,7 +135,7 @@ struct CoachSleepRouteView: View {
     let fmt = DateFormatter()
     fmt.locale = Locale(identifier: "en_US_POSIX")
     fmt.dateFormat = "HH:mm"
-    guard let date = fmt.date(from: start) else { return "30 min before \(start)" }
+    guard let date = fmt.date(from: start) else { return String(localized: "30 min before \(start)") }
     let adjusted = date.addingTimeInterval(-30 * 60)
     return fmt.string(from: adjusted)
   }
@@ -142,7 +144,7 @@ struct CoachSleepRouteView: View {
     guard let actualMinutes = Self.minutes(fromDurationText: actual) else { return "—" }
     let goalMinutes = 8.0 * 60
     let debt = goalMinutes - actualMinutes
-    return debt <= 0 ? "None" : HealthDataStore.minutesText(debt)
+    return debt <= 0 ? String(localized: "None") : HealthDataStore.minutesText(debt)
   }
 
   // Parses duration text in the HealthDataStore.minutesText formats "7h 32m" / "45m".
@@ -227,27 +229,29 @@ struct CoachRecoveryRouteView: View {
         CoachRouteHeader(
           systemImage: "heart.fill",
           title: "Recovery Insights",
-          subtitle: r == nil ? "Score not yet calculated" : "Based on last night's data",
+          subtitle: r == nil
+            ? String(localized: "Score not yet calculated")
+            : String(localized: "Based on last night's data"),
           tint: .green
         )
 
         CoachInfoGroup(title: "SCORE") {
           CoachInfoRow(label: "Recovery", value: r?.score.map { "\($0)" } ?? "—", accent: r?.bandColor)
-          CoachInfoRow(label: "Level", value: r.map { colorBandLabel($0.colourBand) } ?? "—")
-          CoachInfoRow(label: "Confidence", value: r?.trustLevel ?? "—")
+          CoachInfoRow(label: String(localized: "Level"), value: r.map { colorBandLabel($0.colourBand) } ?? "—")
+          CoachInfoRow(label: String(localized: "Confidence"), value: r?.trustLevel ?? "—")
           CoachInfoRow(label: "z-HRV", value: r?.zHRV.map { String(format: "%.2f", $0) } ?? "—")
           CoachInfoRow(label: "z-RHR", value: r?.zRHR.map { String(format: "%.2f", $0) } ?? "—")
         }
 
-        CoachInfoGroup(title: "BIOMETRICS") {
+        CoachInfoGroup(title: String(localized: "BIOMETRICS")) {
           CoachInfoRow(label: "HRV (SDNN)", value: healthStore.hkHRVSDNNMs.map { String(format: "%.0f ms", $0) } ?? "—")
           CoachInfoRow(label: "RHR", value: healthStore.hkRestingHR.map { String(format: "%.0f bpm", $0) } ?? "—")
           CoachInfoRow(label: "Resp. Rate", value: healthStore.hkRespiratoryRate.map { String(format: "%.1f rpm", $0) } ?? "—")
-          CoachInfoRow(label: "Skin temp Δ", value: healthStore.hkSkinTempDeltaC.map { String(format: "%+.2f °C", $0) } ?? "—")
+          CoachInfoRow(label: String(localized: "Skin temp Δ"), value: healthStore.hkSkinTempDeltaC.map { String(format: "%+.2f °C", $0) } ?? "—")
         }
 
         if let r {
-          CoachInfoGroup(title: "RECOMMENDATION") {
+          CoachInfoGroup(title: String(localized: "RECOMMENDATION")) {
             Text(recommendation(for: r.colourBand))
               .font(.subheadline)
               .foregroundStyle(.secondary)
@@ -264,19 +268,19 @@ struct CoachRecoveryRouteView: View {
 
   private func colorBandLabel(_ band: String) -> String {
     switch band {
-    case "verde": return "Ready"
-    case "amarelo": return "Moderate"
-    case "vermelho": return "Fatigued"
+    case "verde": return String(localized: "Ready")
+    case "amarelo": return String(localized: "Moderate")
+    case "vermelho": return String(localized: "Fatigued")
     default: return band.capitalized
     }
   }
 
   private func recommendation(for band: String) -> String {
     switch band {
-    case "verde": return "High recovery — good day for intense training or new load."
-    case "amarelo": return "Moderate recovery — light or technique training. Avoid a new peak effort."
-    case "vermelho": return "Low recovery — prioritise rest, sleep and hydration today."
-    default: return "Waiting for enough data for a personalised recommendation."
+    case "verde": return String(localized: "High recovery — good day for intense training or new load.")
+    case "amarelo": return String(localized: "Moderate recovery — light or technique training. Avoid a new peak effort.")
+    case "vermelho": return String(localized: "Low recovery — prioritise rest, sleep and hydration today.")
+    default: return String(localized: "Waiting for enough data for a personalised recommendation.")
     }
   }
 }
@@ -294,21 +298,21 @@ struct CoachStrainRouteView: View {
         CoachRouteHeader(
           systemImage: "figure.run",
           title: "Strain Guidance",
-          subtitle: "Today's training load",
+          subtitle: String(localized: "Today's training load"),
           tint: .orange
         )
 
-        CoachInfoGroup(title: "LOAD") {
+        CoachInfoGroup(title: String(localized: "LOAD")) {
           CoachInfoRow(label: "Strain Score", value: strainSnapshot.displayValue.isEmpty ? "—" : strainSnapshot.displayValue)
-          CoachInfoRow(label: "Target", value: "10 (moderate)")
-          CoachInfoRow(label: "Status", value: strainSnapshot.status)
-          CoachInfoRow(label: "Source", value: strainSnapshot.source.label)
+          CoachInfoRow(label: String(localized: "Target"), value: String(localized: "10 (moderate)"))
+          CoachInfoRow(label: String(localized: "Status"), value: strainSnapshot.status)
+          CoachInfoRow(label: String(localized: "Source"), value: strainSnapshot.source.label)
         }
 
         let sessions = healthStore.exerciseSessions
-        CoachInfoGroup(title: "ACTIVITIES (\(sessions.count))") {
+        CoachInfoGroup(title: String(localized: "ACTIVITIES (\(sessions.count))")) {
           if sessions.isEmpty {
-            CoachInfoRow(label: "Activities", value: "None detected")
+            CoachInfoRow(label: String(localized: "Activities"), value: String(localized: "None detected"))
           } else {
             ForEach(sessions.prefix(3)) { session in
               CoachInfoRow(
@@ -316,11 +320,11 @@ struct CoachStrainRouteView: View {
                 value: String(format: "%.0f min · strain %.1f", session.durationSeconds / 60, session.strain)
               )
             }
-            CoachInfoRow(label: "Total", value: Self.totalDuration(sessions))
+            CoachInfoRow(label: String(localized: "Total"), value: Self.totalDuration(sessions))
           }
         }
 
-        CoachInfoGroup(title: "GUIDANCE") {
+        CoachInfoGroup(title: String(localized: "GUIDANCE")) {
           Text(strainGuidance)
             .font(.subheadline)
             .foregroundStyle(.secondary)
@@ -336,10 +340,10 @@ struct CoachStrainRouteView: View {
 
   private var strainGuidance: String {
     let raw = Double(strainSnapshot.displayValue.filter("0123456789.".contains)) ?? 0
-    if raw == 0 { return "No strain data for today. Do a session to start tracking." }
-    if raw < 7 { return "Low load — you can raise tomorrow's training intensity." }
-    if raw < 14 { return "Moderate load — on target. Keep this rhythm." }
-    return "High load — prioritise active recovery or rest tomorrow."
+    if raw == 0 { return String(localized: "No strain data for today. Do a session to start tracking.") }
+    if raw < 7 { return String(localized: "Low load — you can raise tomorrow's training intensity.") }
+    if raw < 14 { return String(localized: "Moderate load — on target. Keep this rhythm.") }
+    return String(localized: "High load — prioritise active recovery or rest tomorrow.")
   }
 
   private static func formatTime(_ ts: Double) -> String {
@@ -372,27 +376,27 @@ struct CoachStressRouteView: View {
         CoachRouteHeader(
           systemImage: "brain.head.profile",
           title: "Stress Guidance",
-          subtitle: stress.hasData ? "Based on today's data" : stress.status,
+          subtitle: stress.hasData ? String(localized: "Based on today's data") : stress.status,
           tint: .purple
         )
 
         CoachInfoGroup(title: "SCORE") {
           CoachInfoRow(label: "Stress", value: stress.score.map { String(format: "%.0f", $0) } ?? (stressSnapshot.displayValue.isEmpty ? "—" : stressSnapshot.displayValue))
-          CoachInfoRow(label: "Average HR", value: stress.averageHeartRate.map { String(format: "%.0f bpm", $0) } ?? "—")
-          CoachInfoRow(label: "Latest HRV", value: healthStore.hkHRVSDNNMs.map { String(format: "%.0f ms", $0) } ?? "—")
+          CoachInfoRow(label: String(localized: "Average HR"), value: stress.averageHeartRate.map { String(format: "%.0f bpm", $0) } ?? "—")
+          CoachInfoRow(label: String(localized: "Latest HRV"), value: healthStore.hkHRVSDNNMs.map { String(format: "%.0f ms", $0) } ?? "—")
           CoachInfoRow(label: "Freshness", value: stress.freshness)
         }
 
-        CoachInfoGroup(title: "ZONES") {
-          CoachInfoRow(label: "High (>60)", value: String(format: "%.0f min", stress.high.durationMinutes))
-          CoachInfoRow(label: "Medium (30–60)", value: String(format: "%.0f min", stress.medium.durationMinutes))
-          CoachInfoRow(label: "Low (<30)", value: String(format: "%.0f min", stress.low.durationMinutes))
-          CoachInfoRow(label: "Samples", value: "\(stress.sampleCount)")
+        CoachInfoGroup(title: String(localized: "ZONES")) {
+          CoachInfoRow(label: String(localized: "High (>60)"), value: String(format: "%.0f min", stress.high.durationMinutes))
+          CoachInfoRow(label: String(localized: "Medium (30–60)"), value: String(format: "%.0f min", stress.medium.durationMinutes))
+          CoachInfoRow(label: String(localized: "Low (<30)"), value: String(format: "%.0f min", stress.low.durationMinutes))
+          CoachInfoRow(label: String(localized: "Samples"), value: "\(stress.sampleCount)")
         }
 
         CoachInfoGroup(title: "NON-ACTIVITY STRESS") {
           Text(stress.hasData
-            ? "Stress is calculated across all periods, including exercise windows."
+            ? String(localized: "Stress is calculated across all periods, including exercise windows.")
             : stress.status)
             .font(.subheadline)
             .foregroundStyle(.secondary)

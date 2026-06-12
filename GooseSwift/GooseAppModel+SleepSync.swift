@@ -135,7 +135,7 @@ extension GooseAppModel {
 
       let stagingMethod = stagingResult["staging_method"] as? String ?? "no_imu_data"
       guard stagingMethod != "no_imu_data" else {
-        store?.bandSleepImportStatus = "Awaiting sync"
+        store?.bandSleepImportStatus = String(localized: "Awaiting sync")
         return
       }
 
@@ -171,7 +171,7 @@ extension GooseAppModel {
 
       // Refresh sleep displays and set success status.
       await store?.refreshSleepAfterBandSync(packetCount: 0)
-      store?.bandSleepImportStatus = "Synced from band"
+      store?.bandSleepImportStatus = String(localized: "Synced from band")
       let notifDurationMinutes = Int(stageSummary.values.reduce(0, +))
       let notifHRV: Double? = {
         guard UserDefaults.standard.object(forKey: "goose.swift.liveHRVRMSSD") != nil else { return nil }

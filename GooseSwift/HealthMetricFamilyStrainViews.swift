@@ -244,7 +244,7 @@ struct HealthMetricFamilyView: View {
       }
       return [
         HealthSummaryRow("Primary sleep", value: store.bandSleepImportStatus, source: .unavailable(store.bandSleepImportStatus), systemImage: "bed.double"),
-        HealthSummaryRow("Timeline", value: "No sleep timeline", source: .unavailable(store.bandSleepImportStatus), systemImage: "timeline.selection"),
+        HealthSummaryRow("Timeline", value: String(localized: "No sleep timeline"), source: .unavailable(store.bandSleepImportStatus), systemImage: "timeline.selection"),
       ]
     case .recovery:
       return [
@@ -493,12 +493,12 @@ struct StrainV2OverviewPage: View {
               energyText: store.strainEnergyDisplayText(for: selectedDate)
             )
 
-            SleepV2SectionHeader(title: "Activities", palette: palette)
+            SleepV2SectionHeader(title: String(localized: "Activities"), palette: palette)
             if store.exerciseSessions.isEmpty {
               StrainV2EmptyStateCard(
                 palette: palette,
                 systemImage: "figure.run.circle",
-                title: "No activities",
+                title: String(localized: "No activities"),
                 message: store.strainEmptyStateSummary()
               )
             } else {
@@ -988,9 +988,9 @@ struct ExerciseSessionCard: View {
       }
 
       HStack(spacing: 0) {
-        ExerciseMetricCell(palette: palette, icon: "timer", label: "Duration", value: session.durationText)
+        ExerciseMetricCell(palette: palette, icon: "timer", label: String(localized: "Duration"), value: session.durationText)
         Divider().frame(maxHeight: 40).background(palette.separator.opacity(0.54))
-        ExerciseMetricCell(palette: palette, icon: "flame.fill", label: "Calories", value: session.caloriesText)
+        ExerciseMetricCell(palette: palette, icon: "flame.fill", label: String(localized: "Calories"), value: session.caloriesText)
         Divider().frame(maxHeight: 40).background(palette.separator.opacity(0.54))
         ExerciseMetricCell(palette: palette, icon: "bolt.heart.fill", label: "Strain", value: session.strainText)
       }

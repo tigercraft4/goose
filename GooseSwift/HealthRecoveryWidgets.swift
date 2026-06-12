@@ -396,7 +396,7 @@ struct V24BiometricsCard: View {
         V24MetricCell(
           palette: palette,
           systemImage: "thermometer.medium",
-          label: "Skin temp",
+          label: String(localized: "Skin temp"),
           value: result.skinTempText,
           tint: .orange
         )
@@ -467,7 +467,7 @@ struct ReadinessLevelCard: View {
         Text("Readiness")
           .font(.caption.weight(.semibold))
           .foregroundStyle(palette.mutedText)
-        Text(result?.levelLabel ?? "Insufficient data")
+        Text(result?.levelLabel ?? String(localized: "Insufficient data"))
           .font(.headline.weight(.semibold))
           .foregroundStyle(result != nil ? (result?.levelColor ?? palette.text) : palette.secondaryText)
           .lineLimit(1)
