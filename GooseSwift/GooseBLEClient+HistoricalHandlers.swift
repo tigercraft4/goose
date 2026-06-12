@@ -42,7 +42,9 @@ extension GooseBLEClient {
       // async notification pipeline that causes jetsam kills on long syncs (WHOOP pattern:
       // createWhoopStatusPacketEntityWithData → immediate CoreData write per packet).
       let hex = frame.map { String(format: "%02x", $0) }.joined()
-      let capturedAtISO = ISO8601DateFormatter().string(from: Date())
+      let capturedAtISO = GooseBLEClient.diagnosticLogFormatterLock.withLock {
+        GooseBLEClient.diagnosticLogFormatter.string(from: Date())
+      }
       historicalManager.pendingHistoricalFrames.append((hex: hex, capturedAt: capturedAtISO))
       historicalManager.lastHandledWasHistoricalDataPacket = true
       flushPendingHistoricalFramesIfNeeded()

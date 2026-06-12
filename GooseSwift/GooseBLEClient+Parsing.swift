@@ -874,7 +874,7 @@ extension GooseBLEClient {
   }
 
   static func historicalDataResultPayload(fromHistoryEndMetadataPayload payload: [UInt8]) -> [UInt8]? {
-    guard payload.count > 21 else {
+    guard payload.count >= 21 else {
       return nil
     }
 
