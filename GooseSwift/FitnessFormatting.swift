@@ -53,19 +53,39 @@ extension ActivityKind {
   }
 }
 
-func fitnessDistanceParts(_ meters: CLLocationDistance) -> (value: String, unit: String) {
+let fitnessMetersPerMile: Double = 1609.344
+let fitnessFeetPerMeter: Double = 3.28084
+
+func fitnessDistanceParts(_ meters: CLLocationDistance, imperial: Bool = UnitPreference.isImperial) -> (value: String, unit: String) {
+  if imperial {
+    return (String(format: "%.2f", max(meters, 0) / fitnessMetersPerMile), "MI")
+  }
   if meters >= 1000 {
     return (String(format: "%.2f", meters / 1000), "KM")
   }
   return ("\(Int(max(meters, 0).rounded()))", "M")
 }
 
-func formatFitnessPace(_ secondsPerKilometer: TimeInterval?) -> String {
+// Pace inputs are always seconds-per-kilometer (the tracker's native unit);
+// imperial display converts to seconds-per-mile here.
+func formatFitnessPace(_ secondsPerKilometer: TimeInterval?, imperial: Bool = UnitPreference.isImperial) -> String {
   guard let secondsPerKilometer, secondsPerKilometer.isFinite else {
     return "--'--\""
   }
-  let totalSeconds = max(Int(secondsPerKilometer.rounded()), 0)
+  let secondsPerUnit = imperial ? secondsPerKilometer * (fitnessMetersPerMile / 1000) : secondsPerKilometer
+  let totalSeconds = max(Int(secondsPerUnit.rounded()), 0)
   return String(format: "%d'%02d\"", totalSeconds / 60, totalSeconds % 60)
+}
+
+func fitnessPaceUnitLabel(imperial: Bool = UnitPreference.isImperial) -> String {
+  imperial ? "MI" : "KM"
+}
+
+func fitnessElevationParts(_ meters: Double, imperial: Bool = UnitPreference.isImperial) -> (value: String, unit: String) {
+  if imperial {
+    return ("\(Int((max(meters, 0) * fitnessFeetPerMeter).rounded()))", "FT")
+  }
+  return ("\(Int(max(meters, 0).rounded()))", "M")
 }
 
 func formatFitnessDockDuration(_ elapsed: TimeInterval) -> String {

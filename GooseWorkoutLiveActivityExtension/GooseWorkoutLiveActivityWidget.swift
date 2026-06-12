@@ -128,8 +128,11 @@ private struct WorkoutLiveActivityMetricRow: View {
     guard let distanceMeters = state.distanceMeters else {
       return "--"
     }
+    if attributes.usesImperialUnits {
+      return String(format: "%.2f mi", max(distanceMeters, 0) / 1609.344)
+    }
     if distanceMeters >= 1000 {
-      return String(format: "%.2f", distanceMeters / 1000)
+      return String(format: "%.2f km", distanceMeters / 1000)
     }
     return "\(Int(distanceMeters.rounded()))m"
   }

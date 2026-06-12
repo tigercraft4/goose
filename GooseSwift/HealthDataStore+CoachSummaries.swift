@@ -409,8 +409,11 @@ extension HealthDataStore {
       }
       let rr = Self.numberText(vitals["respiratory_rate_rpm"], fractionDigits: 1) ?? "--"
       let baseline = Self.numberText(vitals["respiratory_rate_baseline_rpm"], fractionDigits: 1) ?? "--"
-      let temp = Self.numberText(vitals["skin_temp_delta_c"], fractionDigits: 1) ?? "--"
-      return "\(source) | \(rr) rpm | \(baseline) rpm baseline | \(temp) C"
+      let imperial = TemperatureFormatting.preferredIsImperial
+      let temp = Self.doubleValue(vitals["skin_temp_delta_c"]).map {
+        TemperatureFormatting.deltaText(celsiusDelta: $0, imperial: imperial, fractionDigits: 1)
+      } ?? "--"
+      return "\(source) | \(rr) rpm | \(baseline) rpm baseline | \(temp)"
     }
     if let report = packetScoreReports["recovery"] {
       let issues = Self.stringArray(report["issues"])

@@ -21,4 +21,5 @@ struct WorkoutLiveActivityAttributes: ActivityAttributes {
   var activityTintHex: String
   var environmentName: String
   var usesGPS: Bool
+  var usesImperialUnits: Bool
 }

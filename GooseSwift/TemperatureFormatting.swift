@@ -1,10 +1,19 @@
 import Foundation
 
+// MARK: - Profile-wide unit preference
+//
+// Sensor values and stored metrics are always metric; conversion to the
+// profile unit preference happens only at display sites.
+
+enum UnitPreference {
+  static var isImperial: Bool {
+    TemperatureFormatting.preferredIsImperial
+  }
+}
+
 // MARK: - Unit-aware temperature display formatting
 //
-// Sensor values and stored metrics are always Celsius; conversion to the
-// profile unit preference happens only at display sites. Deltas scale by
-// 9/5 without the 32° offset.
+// Deltas scale by 9/5 without the 32° offset.
 
 enum TemperatureFormatting {
   static func isImperial(unitSystemRaw: String) -> Bool {

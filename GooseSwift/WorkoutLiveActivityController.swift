@@ -32,7 +32,8 @@ final class WorkoutLiveActivityController {
       activitySystemImage: activity.systemImage,
       activityTintHex: tintHex(for: activity),
       environmentName: environmentName(for: activity),
-      usesGPS: activity.usesGPS
+      usesGPS: activity.usesGPS,
+      usesImperialUnits: UnitPreference.isImperial
     )
     let state = makeState(session: session, heartRate: heartRate, distanceMeters: distanceMeters, status: session.statusText)
     let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(60 * 30))

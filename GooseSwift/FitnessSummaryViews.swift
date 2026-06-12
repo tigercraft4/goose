@@ -76,10 +76,11 @@ struct FitnessSummaryView: View {
   }
 
   private var averagePaceText: String {
+    let unit = fitnessPaceUnitLabel()
     guard locationTracker.distanceMeters > 5, session.elapsed > 0 else {
-      return "--'--\"/KM"
+      return "--'--\"/\(unit)"
     }
-    return "\(formatFitnessPace(session.elapsed / (locationTracker.distanceMeters / 1000)))/KM"
+    return "\(formatFitnessPace(session.elapsed / (locationTracker.distanceMeters / 1000)))/\(unit)"
   }
 
   private var detailMetricTitle: String {

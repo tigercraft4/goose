@@ -146,6 +146,9 @@ struct HomeTimelineSection: View {
   }
 
   private func formatDistance(_ meters: Double) -> String {
+    if UnitPreference.isImperial {
+      return String(format: "%.2f mi", max(meters, 0) / fitnessMetersPerMile)
+    }
     if meters >= 1000 {
       return String(format: "%.2f km", meters / 1000)
     }

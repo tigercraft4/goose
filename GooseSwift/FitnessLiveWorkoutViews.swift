@@ -224,7 +224,7 @@ struct FitnessOverviewPage: View {
         Spacer()
 
         if activity.usesGPS {
-          FitnessPaceBlock(value: formatFitnessPace(currentPace), label: "ROLLING\nKM", color: .white)
+          FitnessPaceBlock(value: formatFitnessPace(currentPace), label: "ROLLING\n\(fitnessPaceUnitLabel())", color: .white)
             .padding(.bottom, 76)
 
           FitnessPaceBlock(value: formatFitnessPace(averagePace), label: "AVERAGE\nPACE", color: .white)
@@ -450,9 +450,10 @@ struct FitnessElevationPage: View {
 
         HStack(alignment: .bottom, spacing: 36) {
           VStack(alignment: .leading, spacing: 4) {
+            let elevation = fitnessElevationParts(elevationMeters)
             FitnessNumberUnit(
-              value: "\(Int(max(elevationMeters, 0).rounded()))",
-              unit: "M",
+              value: elevation.value,
+              unit: elevation.unit,
               color: .white,
               size: 52,
               unitSize: 30
