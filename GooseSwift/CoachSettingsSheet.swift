@@ -21,7 +21,7 @@ struct CoachSettingsSheet: View {
       }
 
       Section(String(localized: "Configuration")) {
-        CoachProviderConfigView(registry: registry)
+        CoachProviderConfigView(registry: registry, chat: chat)
       }
 
       if let active = registry.activeProvider, !active.availablePresets.isEmpty {
@@ -113,12 +113,15 @@ struct CoachProviderPickerRow: View {
 
 struct CoachProviderConfigView: View {
   @Bindable var registry: CoachProviderRegistry
+  var chat: CoachChatModel
 
   var body: some View {
     if let active = registry.activeProvider {
       switch active.id {
       case "chatgpt":
-        ChatGPTConfigView(provider: active)
+        if let chatGPT = active as? ChatGPTCoachProvider {
+          ChatGPTConfigView(provider: chatGPT, chat: chat)
+        }
       case "claude":
         if let claude = active as? ClaudeCoachProvider {
           ClaudeConfigView(provider: claude)
@@ -147,8 +150,13 @@ struct CoachProviderConfigView: View {
 // MARK: - ChatGPTConfigView
 
 private struct ChatGPTConfigView: View {
-  let provider: any CoachProvider
+  let provider: ChatGPTCoachProvider
+  var chat: CoachChatModel
   @State private var showingSignOutConfirm = false
+
+  private var isAwaitingApproval: Bool {
+    provider.deviceCode != nil || provider.loginStatus == "Requesting OAuth code"
+  }
 
   var body: some View {
     if provider.isAuthenticated {
@@ -178,18 +186,59 @@ private struct ChatGPTConfigView: View {
       }
     } else {
       VStack(alignment: .leading, spacing: 12) {
-        Text(String(localized: "Not signed in"))
-          .foregroundStyle(.secondary)
-          .font(.subheadline)
+        if let deviceCode = provider.deviceCode {
+          VStack(alignment: .leading, spacing: 8) {
+            Text(String(localized: "Enter this code on the OpenAI device page:"))
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+            Text(deviceCode.userCode)
+              .font(.title2.monospacedDigit().weight(.bold))
+              .textSelection(.enabled)
+            Link(destination: deviceCode.verificationURL) {
+              Label(deviceCode.verificationURL.absoluteString, systemImage: "safari")
+                .font(.footnote.weight(.semibold))
+            }
+            HStack(spacing: 8) {
+              ProgressView()
+                .controlSize(.small)
+              Text(String(localized: "Waiting for approval…"))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            }
+          }
+        } else if isAwaitingApproval {
+          HStack(spacing: 8) {
+            ProgressView()
+              .controlSize(.small)
+            Text(String(localized: "Requesting sign-in code…"))
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+          }
+        } else {
+          Text(String(localized: "Not signed in"))
+            .foregroundStyle(.secondary)
+            .font(.subheadline)
 
-        Button {
-          // ChatGPT OAuth sign-in is handled by CoachChatModel.startOAuthSignIn()
-          // which is accessible via the existing CoachSignInScreen flow
-        } label: {
-          Label(String(localized: "Sign in with ChatGPT"), systemImage: "person.crop.circle.badge.checkmark")
-            .frame(maxWidth: .infinity)
+          Button {
+            chat.startOAuthSignIn()
+          } label: {
+            Label(String(localized: "Sign in with ChatGPT"), systemImage: "person.crop.circle.badge.checkmark")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.borderedProminent)
+
+          Text(String(localized: "Uses OpenAI device sign-in: you'll get a code to enter in your browser. Tokens are stored in Keychain."))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
-        .buttonStyle(.borderedProminent)
+
+        if let error = chat.errorMessage, !error.isEmpty {
+          Label(error, systemImage: "exclamationmark.triangle")
+            .font(.caption)
+            .foregroundStyle(.red)
+            .fixedSize(horizontal: false, vertical: true)
+        }
       }
     }
   }
