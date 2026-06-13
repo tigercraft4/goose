@@ -144,6 +144,7 @@ struct PrimarySleepDetail: Identifiable {
   let startLabel: String
   let endLabel: String
   let durationText: String
+  let durationMinutes: Double
   let timeInBedText: String
   let scoreText: String
   let qualityText: String

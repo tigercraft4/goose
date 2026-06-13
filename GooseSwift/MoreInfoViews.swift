@@ -45,17 +45,17 @@ struct MorePrivacyView: View {
     .gooseListBackground()
     .navigationTitle("Privacy")
     .confirmationDialog(
-      "Delete all local data?",
+      String(localized: "Delete all local data?"),
       isPresented: $showingDeleteConfirm,
       titleVisibility: .visible
     ) {
-      Button("Delete", role: .destructive) {
+      Button(String(localized: "Delete"), role: .destructive) {
         store.deleteLocalDatabase()
         dbURL = nil
       }
-      Button("Cancel", role: .cancel) {}
+      Button(String(localized: "Cancel"), role: .cancel) {}
     } message: {
-      Text("This action removes the local SQLite database and cannot be undone. Data on the server is not affected.")
+      Text(String(localized: "This action removes the local SQLite database and cannot be undone. Data on the server is not affected."))
     }
   }
 }

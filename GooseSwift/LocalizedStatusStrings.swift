@@ -19,7 +19,7 @@ extension String {
   var localizedConnectionState: String {
     switch self {
     case "disconnected": return String(localized: "Disconnected")
-    case "connecting": return String(localized: "Connecting")
+    case "connecting": return String(localized: "Connecting...")
     case "connected": return String(localized: "Connected")
     case "discovering": return String(localized: "Discovering...")
     case "ready": return String(localized: "Ready")
@@ -33,7 +33,7 @@ extension String {
   var localizedHRConnectionState: String {
     switch self {
     case "disconnected": return String(localized: "Disconnected")
-    case "connecting": return String(localized: "Connecting")
+    case "connecting": return String(localized: "Connecting...")
     case "connected": return String(localized: "Connected")
     default: return self
     }

@@ -45,6 +45,7 @@ extension HealthDataStore {
       startLabel: start.map(timeLabel) ?? "--",
       endLabel: end.map(timeLabel) ?? "--",
       durationText: minutesText(duration),
+      durationMinutes: duration,
       timeInBedText: minutesText(timeInBed),
       scoreText: score,
       qualityText: sleepQualityLabel(score: doubleValue(output["score_0_to_100"])),

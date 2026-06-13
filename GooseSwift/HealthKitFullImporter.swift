@@ -161,6 +161,7 @@ enum HealthKitFullImporter {
       startLabel: shortTime(start),
       endLabel: shortTime(end),
       durationText: HealthDataStore.minutesText(asleepMinutes),
+      durationMinutes: asleepMinutes,
       timeInBedText: HealthDataStore.minutesText(timeInBedMinutes),
       scoreText: "--",
       qualityText: sleepQuality(asleepMinutes),

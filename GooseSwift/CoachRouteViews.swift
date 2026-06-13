@@ -114,9 +114,9 @@ struct CoachSleepRouteView: View {
 
         if let sleep {
           CoachInfoGroup(title: String(localized: "SLEEP DEBT")) {
-            CoachInfoRow(label: String(localized: "Goal"), value: "8h 00m")
+            CoachInfoRow(label: String(localized: "Goal"), value: HealthDataStore.minutesText(Self.sleepGoalMinutes))
             CoachInfoRow(label: String(localized: "Actual"), value: sleep.durationText)
-            CoachInfoRow(label: String(localized: "Debt"), value: sleepDebt(actual: sleep.durationText))
+            CoachInfoRow(label: String(localized: "Debt"), value: sleepDebt(actualMinutes: sleep.durationMinutes))
           }
         }
 
@@ -130,33 +130,27 @@ struct CoachSleepRouteView: View {
   }
 
   private var windDownTime: String {
-    guard let start = sleep?.startLabel else { return "—" }
+    guard let start = sleep?.startLabel, start != "--" else { return "—" }
     // Parse HH:mm and subtract 30 min
     let fmt = DateFormatter()
     fmt.locale = Locale(identifier: "en_US_POSIX")
     fmt.dateFormat = "HH:mm"
-    guard let date = fmt.date(from: start) else { return String(localized: "30 min before \(start)") }
+    guard let date = fmt.date(from: start) else {
+      // start did not parse as a valid HH:mm time; avoid surfacing a malformed
+      // value (e.g. "25:99") to the user and fall back to a neutral placeholder.
+      return "—"
+    }
     let adjusted = date.addingTimeInterval(-30 * 60)
     return fmt.string(from: adjusted)
   }
 
-  private func sleepDebt(actual: String) -> String {
-    guard let actualMinutes = Self.minutes(fromDurationText: actual) else { return "—" }
-    let goalMinutes = 8.0 * 60
-    let debt = goalMinutes - actualMinutes
-    return debt <= 0 ? String(localized: "None") : HealthDataStore.minutesText(debt)
-  }
+  // Single source of truth for the nightly sleep goal, used for both the displayed
+  // "Goal" row and the debt computation so they can never drift apart.
+  private static let sleepGoalMinutes = 8.0 * 60
 
-  // Parses duration text in the HealthDataStore.minutesText formats "7h 32m" / "45m".
-  private static func minutes(fromDurationText text: String) -> Double? {
-    var hours: Double?
-    var mins: Double?
-    for token in text.split(separator: " ") {
-      if token.hasSuffix("h"), let v = Double(token.dropLast()) { hours = v }
-      if token.hasSuffix("m"), let v = Double(token.dropLast()) { mins = v }
-    }
-    guard hours != nil || mins != nil else { return nil }
-    return (hours ?? 0) * 60 + (mins ?? 0)
+  private func sleepDebt(actualMinutes: Double) -> String {
+    let debt = Self.sleepGoalMinutes - actualMinutes
+    return debt <= 0 ? String(localized: "None") : HealthDataStore.minutesText(debt)
   }
 
   private var isDisconnected: Bool { model.ble.connectionState != "ready" }
