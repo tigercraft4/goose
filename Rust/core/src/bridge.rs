@@ -3502,10 +3502,7 @@ fn upload_get_recent_decoded_streams_bridge(
                                 }));
                             }
                         }
-                        DataPacketBodySummary::R22Whoop5Hr {
-                            hr_bpm,
-                            ..
-                        } => {
+                        DataPacketBodySummary::R22Whoop5Hr { hr_bpm, .. } => {
                             // R22 WHOOP 5.0 realtime packet: push HR into the same stream
                             // as NormalHistory/V24 so the upload pipeline receives it.
                             if let (Some(ts), Some(bpm)) = (ts_unix, *hr_bpm) {
