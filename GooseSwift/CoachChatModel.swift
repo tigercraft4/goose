@@ -64,6 +64,7 @@ final class CoachChatModel {
   }
 
   func startOAuthSignIn() {
+    errorMessage = nil
     guard let chatGPT = registry.activeProvider as? ChatGPTCoachProvider else { return }
     Task { [chatGPT, weak self] in
       do {

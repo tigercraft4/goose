@@ -7984,6 +7984,16 @@
         }
       }
     },
+    "This provider could not be configured. Please reselect it above." : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível configurar este fornecedor. Selecione-o novamente acima."
+          }
+        }
+      }
+    },
     "This surface records the gate only. No haptics, firmware, config, or reboot command is sent from this tap." : {
       "localizations" : {
         "pt-PT" : {

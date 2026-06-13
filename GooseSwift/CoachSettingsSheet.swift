@@ -115,24 +115,39 @@ struct CoachProviderConfigView: View {
   @Bindable var registry: CoachProviderRegistry
   var chat: CoachChatModel
 
+  private var providerMismatchView: some View {
+    assertionFailure("Active provider does not match its registered id type")
+    return Text(String(localized: "This provider could not be configured. Please reselect it above."))
+      .foregroundStyle(.secondary)
+      .font(.subheadline)
+  }
+
   var body: some View {
     if let active = registry.activeProvider {
       switch active.id {
       case "chatgpt":
         if let chatGPT = active as? ChatGPTCoachProvider {
           ChatGPTConfigView(provider: chatGPT, chat: chat)
+        } else {
+          providerMismatchView
         }
       case "claude":
         if let claude = active as? ClaudeCoachProvider {
           ClaudeConfigView(provider: claude)
+        } else {
+          providerMismatchView
         }
       case "gemini":
         if let gemini = active as? GeminiCoachProvider {
           GeminiConfigView(provider: gemini)
+        } else {
+          providerMismatchView
         }
       case "custom":
         if let custom = active as? CustomEndpointCoachProvider {
           CustomEndpointConfigView(provider: custom)
+        } else {
+          providerMismatchView
         }
       default:
         Text(String(localized: "Select a provider above to get started."))
@@ -155,7 +170,7 @@ private struct ChatGPTConfigView: View {
   @State private var showingSignOutConfirm = false
 
   private var isAwaitingApproval: Bool {
-    provider.deviceCode != nil || provider.loginStatus == "Requesting OAuth code"
+    provider.loginStatus == "Requesting OAuth code"
   }
 
   var body: some View {
