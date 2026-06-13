@@ -165,7 +165,7 @@ struct HomeHealthMetricCard: View {
   // A checkmark is only earned by a real value; pending/empty states show a
   // neutral collecting glyph instead of a green check next to "No data".
   private var hasMetricValue: Bool {
-    let value = snapshot.value.trimmingCharacters(in: .whitespaces)
+    let value = snapshot.value.trimmingCharacters(in: .whitespacesAndNewlines)
     return !(value.isEmpty || value == "--" || value == "—")
   }
 

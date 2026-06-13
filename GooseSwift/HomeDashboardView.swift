@@ -125,6 +125,8 @@ struct HomeDashboardView: View {
     }
     .task {
       await healthStore.loadBridgeCatalogsIfNeeded()
+      // Fire-and-forget: this spawns its own Task internally, so the view task
+      // intentionally does not await the packet-input run; results publish later.
       healthStore.refreshPacketInputsIfNeeded()
       model.refreshActivityTimeline(for: selectedDate)
       refreshSnapshots()

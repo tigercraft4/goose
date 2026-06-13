@@ -75,6 +75,12 @@ enum CoachTipFactory {
         return String(localized: "\(progress.readyFamilies) of \(progress.totalFamilies) scores ready. Keep wearing your strap and the rest will fill in.")
       }
     }
+    // A report can exist before any score family is tracked (totalFamilies == 0):
+    // allReady is false and collectingFamilies is empty, so fall back to the
+    // warm-up copy instead of implying every score is already healthy.
+    guard progress.totalFamilies > 0 else {
+      return String(localized: "\(progress.readyFamilies) of \(progress.totalFamilies) scores ready. Keep wearing your strap and the rest will fill in.")
+    }
     return String(localized: "Sleep \(sleep.displayValue), recovery \(recovery.displayValue), strain \(strain.displayValue). Ask Coach what to prioritise today.")
   }
 
