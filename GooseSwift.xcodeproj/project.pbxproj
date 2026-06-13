@@ -98,6 +98,7 @@
 		D10000000000000000000012 /* FitnessControlViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000012 /* FitnessControlViews.swift */; };
 		D10000000000000000000013 /* FitnessSummaryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000013 /* FitnessSummaryViews.swift */; };
 		D10000000000000000000014 /* FitnessFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000014 /* FitnessFormatting.swift */; };
+		F0E11111111111111111A001 /* TemperatureFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E22222222222222222A002 /* TemperatureFormatting.swift */; };
 		D10000000000000000000017 /* NotificationFrameParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000017 /* NotificationFrameParsing.swift */; };
 		D10000000000000000000018 /* CaptureFrameWriteQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000018 /* CaptureFrameWriteQueue.swift */; };
 		D10000000000000000000019 /* OvernightSQLiteMirrorQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000019 /* OvernightSQLiteMirrorQueue.swift */; };
@@ -330,6 +331,7 @@
 		D20000000000000000000012 /* FitnessControlViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessControlViews.swift; sourceTree = "<group>"; };
 		D20000000000000000000013 /* FitnessSummaryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessSummaryViews.swift; sourceTree = "<group>"; };
 		D20000000000000000000014 /* FitnessFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessFormatting.swift; sourceTree = "<group>"; };
+		F0E22222222222222222A002 /* TemperatureFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureFormatting.swift; sourceTree = "<group>"; };
 		D20000000000000000000017 /* NotificationFrameParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFrameParsing.swift; sourceTree = "<group>"; };
 		D20000000000000000000018 /* CaptureFrameWriteQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureFrameWriteQueue.swift; sourceTree = "<group>"; };
 		D20000000000000000000019 /* OvernightSQLiteMirrorQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OvernightSQLiteMirrorQueue.swift; sourceTree = "<group>"; };
@@ -576,6 +578,7 @@
 				D20000000000000000000012 /* FitnessControlViews.swift */,
 				D20000000000000000000013 /* FitnessSummaryViews.swift */,
 				D20000000000000000000014 /* FitnessFormatting.swift */,
+				F0E22222222222222222A002 /* TemperatureFormatting.swift */,
 				A20000000000000000000014 /* HealthView.swift */,
 				C20000000000000000000001 /* HealthModels.swift */,
 				C20000000000000000000002 /* HealthScoreDateViews.swift */,
@@ -956,6 +959,7 @@
 				D10000000000000000000012 /* FitnessControlViews.swift in Sources */,
 				D10000000000000000000013 /* FitnessSummaryViews.swift in Sources */,
 				D10000000000000000000014 /* FitnessFormatting.swift in Sources */,
+				F0E11111111111111111A001 /* TemperatureFormatting.swift in Sources */,
 				A10000000000000000000010 /* HealthView.swift in Sources */,
 				C10000000000000000000001 /* HealthModels.swift in Sources */,
 				C10000000000000000000002 /* HealthScoreDateViews.swift in Sources */,
