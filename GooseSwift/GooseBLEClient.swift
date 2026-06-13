@@ -990,10 +990,6 @@ import OSLog
       guard let self else { return }
       self.updateConnectionState(newState.connectionStateString)
     }
-    historicalManager.onSyncStateChange = { [weak self] _ in
-      // @Observable tracks historicalManager.isHistoricalSyncing via the proxy var;
-      // the callback exists for future explicit observers if needed.
-    }
     historicalManager.onSyncCompleted = { [weak self] completedAt in
       guard let self else { return }
       Task { @MainActor in
