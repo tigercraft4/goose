@@ -32,7 +32,7 @@ struct MoreDebugView: View {
           title: "Catalog",
           value: healthStore.catalogStatus,
           systemImage: "books.vertical",
-          status: healthStore.catalogStatus.contains("loaded") ? .ready : .pending
+          status: (healthStore.catalogStatus.localizedCaseInsensitiveContains("loaded") && !healthStore.catalogStatus.localizedCaseInsensitiveContains("not loaded")) ? .ready : .pending
         )
         MoreInfoRow(
           title: "Store",

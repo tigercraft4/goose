@@ -2936,6 +2936,16 @@
         }
       }
     },
+    "Estimated from heart rate" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado pela frequência cardíaca"
+          }
+        }
+      }
+    },
     "Estimated on this iPhone" : {
       "localizations" : {
         "pt-PT" : {
@@ -3309,6 +3319,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Análise de Frame"
+          }
+        }
+      }
+    },
+    "From Apple Health" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do Apple Health"
           }
         }
       }
@@ -4806,6 +4826,16 @@
         }
       }
     },
+    "Needs more activity" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precisa de mais atividade"
+          }
+        }
+      }
+    },
     "Nenhum dispositivo guardado" : {
       "localizations" : {
         "pt-PT" : {
@@ -4956,6 +4986,16 @@
         }
       }
     },
+    "No heart rate data" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dados de frequência cardíaca"
+          }
+        }
+      }
+    },
     "No HR monitors found. Make sure your device is nearby and powered on." : {
       "localizations" : {
         "pt-PT" : {
@@ -4978,6 +5018,16 @@
         }
       }
     },
+    "No live data" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dados em direto"
+          }
+        }
+      }
+    },
     "No recovery insights" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4996,6 +5046,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sem linha temporal de recuperação"
+          }
+        }
+      }
+    },
+    "No sleep data" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dados de sono"
           }
         }
       }
@@ -5023,6 +5083,16 @@
         }
       }
     },
+    "No strain data" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dados de esforço"
+          }
+        }
+      }
+    },
     "No strain insights" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5041,6 +5111,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sem tendências de esforço"
+          }
+        }
+      }
+    },
+    "No stress data" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dados de stress"
           }
         }
       }
@@ -5977,6 +6057,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Análise de Recuperação"
+          }
+        }
+      }
+    },
+    "Recovery, HRV & Strain" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recuperação, VFC e Esforço"
           }
         }
       }
@@ -7393,6 +7483,16 @@
         }
       }
     },
+    "Source" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonte"
+          }
+        }
+      }
+    },
     "Sources" : {
       "localizations" : {
         "pt-PT" : {
@@ -8321,6 +8421,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cobertura UI"
+          }
+        }
+      }
+    },
+    "Unavailable" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponível"
           }
         }
       }

@@ -60,7 +60,7 @@ struct HomeDashboardView: View {
         )
 
         HomeToolsGrid(
-          catalogReady: healthStore.catalogStatus.contains("loaded"),
+          catalogReady: healthStore.catalogStatus.localizedCaseInsensitiveContains("loaded") && !healthStore.catalogStatus.localizedCaseInsensitiveContains("not loaded"),
           openSleepCoach: {
             router.openCoach(prompt: "Sleep coach: review my sleep quality and give me advice")
           },
