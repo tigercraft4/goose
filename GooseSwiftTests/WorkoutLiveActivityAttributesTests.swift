@@ -2,41 +2,44 @@ import XCTest
 @testable import GooseSwift
 
 final class WorkoutLiveActivityAttributesTests: XCTestCase {
-  func testDecodesPreUnitPreferenceAttributesWithMetricDefault() throws {
+  func testDecodesPreUnitPreferenceStateWithMetricDefault() throws {
     let data = Data("""
     {
-      "sessionID": "legacy-session",
-      "activityName": "Run",
-      "activitySystemImage": "figure.run",
-      "activityTintHex": "#00ff88",
-      "environmentName": "Outdoor",
-      "usesGPS": true
+      "status": "Running",
+      "elapsedSeconds": 120,
+      "activeCalories": 15,
+      "isPaused": false,
+      "updatedAt": 0
     }
     """.utf8)
 
-    let attributes = try JSONDecoder().decode(WorkoutLiveActivityAttributes.self, from: data)
+    let state = try JSONDecoder().decode(WorkoutLiveActivityAttributes.ContentState.self, from: data)
 
-    XCTAssertEqual(attributes.sessionID, "legacy-session")
-    XCTAssertTrue(attributes.usesGPS)
-    XCTAssertFalse(attributes.usesImperialUnits)
+    XCTAssertEqual(state.status, "Running")
+    XCTAssertEqual(state.elapsedSeconds, 120)
+    XCTAssertFalse(state.usesImperialUnits)
   }
 
-  func testRoundTripsUnitPreferenceAttribute() throws {
-    let attributes = WorkoutLiveActivityAttributes(
-      sessionID: "session",
-      activityName: "Ride",
-      activitySystemImage: "bicycle",
-      activityTintHex: "#ffcc00",
-      environmentName: "Outdoor",
-      usesGPS: true,
+  func testRoundTripsUnitPreferenceState() throws {
+    let state = WorkoutLiveActivityAttributes.ContentState(
+      status: "Riding",
+      timerStartDate: nil,
+      elapsedSeconds: 300,
+      currentHeartRate: 142,
+      averageHeartRate: 138,
+      maxHeartRate: 156,
+      activeCalories: 38,
+      distanceMeters: 1200,
+      isPaused: false,
+      updatedAt: Date(timeIntervalSince1970: 0),
       usesImperialUnits: true
     )
 
-    let encoded = try JSONEncoder().encode(attributes)
-    let decoded = try JSONDecoder().decode(WorkoutLiveActivityAttributes.self, from: encoded)
+    let encoded = try JSONEncoder().encode(state)
+    let decoded = try JSONDecoder().decode(WorkoutLiveActivityAttributes.ContentState.self, from: encoded)
 
-    XCTAssertEqual(decoded.sessionID, attributes.sessionID)
-    XCTAssertTrue(decoded.usesGPS)
+    XCTAssertEqual(decoded.status, state.status)
+    XCTAssertEqual(decoded.currentHeartRate, state.currentHeartRate)
     XCTAssertTrue(decoded.usesImperialUnits)
   }
 }

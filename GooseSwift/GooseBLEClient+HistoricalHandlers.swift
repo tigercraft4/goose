@@ -732,6 +732,11 @@ extension GooseBLEClient {
     historicalManager.historicalRangeRetryCount = 0
     historicalManager.historicalTransferRequestAttemptCount = 0
     historicalManager.historicalDataResultAckEnabled = true
+    // Reset the determinate sync-progress counters so a completion reached
+    // without going through startHistoricalDataSync cannot leak a stale total
+    // or burst count into the next sync session.
+    historicalSyncPagesTotal = nil
+    historicalSyncBurstsCompleted = 0
     let completedAt = Date()
     let rangeOnly = historicalManager.historicalRangePollOnly
     flushPendingHistoricalFramesIfNeeded(force: true)
@@ -769,6 +774,11 @@ extension GooseBLEClient {
     historicalManager.historicalRangeRetryCount = 0
     historicalManager.historicalTransferRequestAttemptCount = 0
     historicalManager.historicalDataResultAckEnabled = true
+    // Reset the determinate sync-progress counters so a failure reached
+    // without going through startHistoricalDataSync cannot leak a stale total
+    // or burst count into the next sync session.
+    historicalSyncPagesTotal = nil
+    historicalSyncBurstsCompleted = 0
     flushPendingHistoricalFramesIfNeeded(force: true)
     historicalManager.failSync(status: "failed")
     historicalManager.historicalRangePollOnly = false

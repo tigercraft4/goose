@@ -632,7 +632,7 @@ extension GooseBLEClient {
     }
     var words: [UInt32] = []
     var offset = 1
-    while offset + 3 < body.count, offset < 25 {
+    while offset < 25 {
       if let word = Self.readUInt32LE(body, at: offset) {
         words.append(word)
       }
@@ -710,9 +710,13 @@ extension GooseBLEClient {
       historicalManager.historicalRangePageState = nil
     }
 
-    // Seed the determinate sync-progress total. Gen4 range responses use a
-    // different body layout, so the V5 page words are not trusted there.
+    // Seed the determinate sync-progress total once per sync session. Gen4
+    // range responses use a different body layout, so the V5 page words are
+    // not trusted there. Guarding on historicalSyncPagesTotal == nil keeps a
+    // re-issued GET_DATA_RANGE within the same session from growing the
+    // denominator and rewinding the progress ring.
     if status == "success", activeDeviceGeneration != .gen4,
+       historicalSyncPagesTotal == nil,
        let pagesBehind, pagesBehind > 0, isHistoricalSyncing {
       historicalSyncPagesTotal = Int(pagesBehind)
     }

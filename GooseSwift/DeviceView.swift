@@ -468,7 +468,7 @@ private struct DeviceSyncProgressCard: View {
     .background(controlBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     .accessibilityElement(children: .combine)
     .accessibilityLabel(Text("Sync in progress"))
-    .accessibilityValue(Text(percentText ?? "\(ble.historicalPacketCount) packets received"))
+    .accessibilityValue(Text(percentText ?? String(localized: "\(ble.historicalPacketCount) packets received")))
   }
 }
 
