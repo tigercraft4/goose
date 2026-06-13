@@ -7088,6 +7088,26 @@
         }
       }
     },
+    "Skin temp" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatura"
+          }
+        }
+      }
+    },
+    "Skin temp Δ" : {
+      "localizations" : {
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temp. pele Δ"
+          }
+        }
+      }
+    },
     "Skip setup" : {
       "localizations" : {
         "pt-PT" : {

@@ -9,6 +9,7 @@ struct FitnessSummaryView: View {
   var ble: GooseBLEClient
   @ObservedObject var locationTracker: ActivityLocationTracker
   let onDone: () -> Void
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
 
   var body: some View {
     ScrollView {
@@ -76,11 +77,12 @@ struct FitnessSummaryView: View {
   }
 
   private var averagePaceText: String {
-    let unit = fitnessPaceUnitLabel()
+    let imperial = TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw)
+    let unit = fitnessPaceUnitLabel(imperial: imperial)
     guard locationTracker.distanceMeters > 5, session.elapsed > 0 else {
       return "--'--\"/\(unit)"
     }
-    return "\(formatFitnessPace(session.elapsed / (locationTracker.distanceMeters / 1000)))/\(unit)"
+    return "\(formatFitnessPace(session.elapsed / (locationTracker.distanceMeters / 1000), imperial: imperial))/\(unit)"
   }
 
   private var detailMetricTitle: String {

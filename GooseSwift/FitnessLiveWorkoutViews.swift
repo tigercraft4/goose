@@ -207,6 +207,7 @@ struct FitnessPageCarousel: View {
 
 struct FitnessOverviewPage: View {
   @Environment(GooseAppModel.self) private var model
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
   let activity: ActivityKind
   let currentHeartRate: Int?
   let averageHeartRate: Int?
@@ -216,6 +217,7 @@ struct FitnessOverviewPage: View {
   let averagePace: TimeInterval?
 
   var body: some View {
+    let imperial = TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw)
     FitnessMetricPageLayout {
       VStack(alignment: .leading, spacing: 0) {
         FitnessHeartRateValue(currentHeartRate, size: 76)
@@ -224,13 +226,13 @@ struct FitnessOverviewPage: View {
         Spacer()
 
         if activity.usesGPS {
-          FitnessPaceBlock(value: formatFitnessPace(currentPace), label: "ROLLING\n\(fitnessPaceUnitLabel())", color: .white)
+          FitnessPaceBlock(value: formatFitnessPace(currentPace, imperial: imperial), label: "ROLLING\n\(fitnessPaceUnitLabel(imperial: imperial))", color: .white)
             .padding(.bottom, 76)
 
-          FitnessPaceBlock(value: formatFitnessPace(averagePace), label: "AVERAGE\nPACE", color: .white)
+          FitnessPaceBlock(value: formatFitnessPace(averagePace, imperial: imperial), label: "AVERAGE\nPACE", color: .white)
             .padding(.bottom, 88)
 
-          let distance = fitnessDistanceParts(distanceMeters)
+          let distance = fitnessDistanceParts(distanceMeters, imperial: imperial)
           FitnessNumberUnit(value: distance.value, unit: distance.unit, color: .white, size: 72, unitSize: 40)
             .padding(.bottom, 18)
         } else {
@@ -423,16 +425,19 @@ struct FitnessSplitPage: View {
 }
 
 struct FitnessElevationPage: View {
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
   let elevationMeters: CLLocationDistance
   let elevationGainMeters: CLLocationDistance
   let currentPace: TimeInterval?
 
   var body: some View {
+    let imperial = TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw)
     FitnessMetricPageLayout {
       VStack(spacing: 0) {
+        let elevationGain = fitnessElevationParts(elevationGainMeters, imperial: imperial)
         FitnessNumberUnit(
-          value: "\(Int(max(elevationGainMeters, 0).rounded()))",
-          unit: "M",
+          value: elevationGain.value,
+          unit: elevationGain.unit,
           color: FitnessColor.exerciseGreen,
           size: 64,
           unitSize: 34
@@ -450,7 +455,7 @@ struct FitnessElevationPage: View {
 
         HStack(alignment: .bottom, spacing: 36) {
           VStack(alignment: .leading, spacing: 4) {
-            let elevation = fitnessElevationParts(elevationMeters)
+            let elevation = fitnessElevationParts(elevationMeters, imperial: imperial)
             FitnessNumberUnit(
               value: elevation.value,
               unit: elevation.unit,
@@ -463,7 +468,7 @@ struct FitnessElevationPage: View {
           .frame(maxWidth: .infinity, alignment: .leading)
 
           VStack(alignment: .leading, spacing: 4) {
-            Text(formatFitnessPace(currentPace))
+            Text(formatFitnessPace(currentPace, imperial: imperial))
               .font(.system(size: 38, weight: .regular, design: .rounded))
               .foregroundStyle(.white)
               .lineLimit(1)

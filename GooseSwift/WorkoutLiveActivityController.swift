@@ -32,8 +32,7 @@ final class WorkoutLiveActivityController {
       activitySystemImage: activity.systemImage,
       activityTintHex: tintHex(for: activity),
       environmentName: environmentName(for: activity),
-      usesGPS: activity.usesGPS,
-      usesImperialUnits: UnitPreference.isImperial
+      usesGPS: activity.usesGPS
     )
     let state = makeState(session: session, heartRate: heartRate, distanceMeters: distanceMeters, status: session.statusText)
     let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(60 * 30))
@@ -141,7 +140,8 @@ final class WorkoutLiveActivityController {
       activeCalories: max(Int(elapsed / 8), 0),
       distanceMeters: distanceMeters > 0 ? distanceMeters : nil,
       isPaused: session.isPaused,
-      updatedAt: now
+      updatedAt: now,
+      usesImperialUnits: UnitPreference.isImperial
     )
   }
 

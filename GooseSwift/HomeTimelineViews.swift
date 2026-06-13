@@ -8,6 +8,7 @@ struct HomeTimelineSection: View {
   let openSleep: () -> Void
   let openActivity: () -> Void
   let openRecovery: () -> Void
+  @AppStorage(OnboardingStorage.unitSystem) private var unitSystemRaw = MoreProfileUnitSystem.imperial.rawValue
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -146,7 +147,7 @@ struct HomeTimelineSection: View {
   }
 
   private func formatDistance(_ meters: Double) -> String {
-    if UnitPreference.isImperial {
+    if TemperatureFormatting.isImperial(unitSystemRaw: unitSystemRaw) {
       return String(format: "%.2f mi", max(meters, 0) / fitnessMetersPerMile)
     }
     if meters >= 1000 {
