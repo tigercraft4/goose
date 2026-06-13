@@ -476,6 +476,18 @@ import OSLog
     let sequence: UInt8
   }
 
+  struct HistoricalRangePageState: Equatable {
+    let pageCurrent: UInt32
+    let pageOldest: UInt32
+    let pageEnd: UInt32
+
+    var pagesBehind: Int64 {
+      pageCurrent < pageOldest
+        ? Int64(pageCurrent) + Int64(pageEnd) - Int64(pageOldest)
+        : Int64(pageCurrent) - Int64(pageOldest)
+    }
+  }
+
   enum ClockCommandKind {
     case get
     case set(Date)

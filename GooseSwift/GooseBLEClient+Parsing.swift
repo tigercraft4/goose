@@ -622,6 +622,32 @@ extension GooseBLEClient {
     return body.count >= 25
   }
 
+  static func historicalRangePageState(fromCommandResponsePayload payload: [UInt8]) -> HistoricalRangePageState? {
+    historicalRangePageState(fromRangeBody: Array(payload.dropFirst(5)))
+  }
+
+  static func historicalRangePageState(fromRangeBody body: [UInt8]) -> HistoricalRangePageState? {
+    guard body.count >= 25 else {
+      return nil
+    }
+    var words: [UInt32] = []
+    var offset = 1
+    while offset + 3 < body.count, offset < 25 {
+      if let word = Self.readUInt32LE(body, at: offset) {
+        words.append(word)
+      }
+      offset += 4
+    }
+    guard words.count >= 6 else {
+      return nil
+    }
+    return HistoricalRangePageState(
+      pageCurrent: words[2],
+      pageOldest: words[3],
+      pageEnd: words[5]
+    )
+  }
+
   func historicalResponseDetail(command: HistoricalCommandKind, payload: [UInt8]) -> String {
     guard command == .getDataRange else {
       return ""
@@ -645,17 +671,11 @@ extension GooseBLEClient {
       "revision_or_status=\(body[0])",
       "u32_words_from_offset_1=[\(words.map(String.init).joined(separator: ","))]",
     ]
-    if words.count >= 6 {
-      let pageCurrent = words[2]
-      let pageOldest = words[3]
-      let pageEnd = words[5]
-      let pagesBehind: Int64 = pageCurrent < pageOldest
-        ? Int64(pageCurrent) + Int64(pageEnd) - Int64(pageOldest)
-        : Int64(pageCurrent) - Int64(pageOldest)
-      parts.append("page_current=\(pageCurrent)")
-      parts.append("page_oldest=\(pageOldest)")
-      parts.append("page_end=\(pageEnd)")
-      parts.append("pages_behind=\(pagesBehind)")
+    if let pageState = Self.historicalRangePageState(fromRangeBody: body) {
+      parts.append("page_current=\(pageState.pageCurrent)")
+      parts.append("page_oldest=\(pageState.pageOldest)")
+      parts.append("page_end=\(pageState.pageEnd)")
+      parts.append("pages_behind=\(pageState.pagesBehind)")
     }
     return " | " + parts.joined(separator: " ")
   }
@@ -678,16 +698,16 @@ extension GooseBLEClient {
       offset += 4
     }
 
-    let pageCurrent = words.count >= 3 ? words[2] : nil
-    let pageOldest = words.count >= 4 ? words[3] : nil
-    let pageEnd = words.count >= 6 ? words[5] : nil
-    let pagesBehind: Int64?
-    if let pageCurrent, let pageOldest, let pageEnd {
-      pagesBehind = pageCurrent < pageOldest
-        ? Int64(pageCurrent) + Int64(pageEnd) - Int64(pageOldest)
-        : Int64(pageCurrent) - Int64(pageOldest)
-    } else {
-      pagesBehind = nil
+    let pageState = Self.historicalRangePageState(fromRangeBody: body)
+    let pageCurrent = pageState?.pageCurrent
+    let pageOldest = pageState?.pageOldest
+    let pageEnd = pageState?.pageEnd
+    let pagesBehind = pageState?.pagesBehind
+
+    if status == "success", activeDeviceGeneration != .gen4 {
+      historicalManager.historicalRangePageState = pageState
+    } else if status != "pending" {
+      historicalManager.historicalRangePageState = nil
     }
 
     // Seed the determinate sync-progress total. Gen4 range responses use a

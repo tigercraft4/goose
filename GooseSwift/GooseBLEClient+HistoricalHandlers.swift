@@ -580,6 +580,11 @@ extension GooseBLEClient {
         completeHistoricalSync(reason: "historical_range_poll_complete")
         return
       }
+      if activeDeviceGeneration != .gen4,
+         historicalManager.historicalRangePageState?.pagesBehind == 0 {
+        completeHistoricalSync(reason: "historical_range_empty")
+        return
+      }
       writeHistoricalCommand(.sendHistoricalData)
     case .sendHistoricalData:
       scheduleHistoricalIdleCompletion(reason: "historical_transfer_idle")
@@ -722,6 +727,7 @@ extension GooseBLEClient {
     historicalManager.historyStartReceived = false
     historicalManager.historyEndReceived = false
     historicalManager.historyCompleteReceived = false
+    historicalManager.historicalRangePageState = nil
     historicalManager.historicalRangePendingResponses = 0
     historicalManager.historicalRangeRetryCount = 0
     historicalManager.historicalTransferRequestAttemptCount = 0
@@ -758,6 +764,7 @@ extension GooseBLEClient {
     historicalManager.historyStartReceived = false
     historicalManager.historyEndReceived = false
     historicalManager.historyCompleteReceived = false
+    historicalManager.historicalRangePageState = nil
     historicalManager.historicalRangePendingResponses = 0
     historicalManager.historicalRangeRetryCount = 0
     historicalManager.historicalTransferRequestAttemptCount = 0

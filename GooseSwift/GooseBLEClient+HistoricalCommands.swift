@@ -49,6 +49,7 @@ extension GooseBLEClient {
     historicalManager.historyEndReceived = false
     historicalManager.historyCompleteReceived = false
     historicalManager.historyStartReceived = false
+    historicalManager.historicalRangePageState = nil
     historicalManager.historicalRangePendingResponses = 0
     historicalManager.historicalRangeRetryCount = 0
     historicalManager.historicalTransferRequestAttemptCount = 0

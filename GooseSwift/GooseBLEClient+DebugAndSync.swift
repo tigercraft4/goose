@@ -383,21 +383,22 @@ extension GooseBLEClient {
       self.completeHistoricalSync(reason: reason)
     }
     historicalManager.historicalIdleWorkItem = workItem
-    DispatchQueue.main.asyncAfter(deadline: .now() + 12, execute: workItem)
+    DispatchQueue.main.asyncAfter(deadline: .now() + historicalManager.historicalIdleCompletionTimeout, execute: workItem)
   }
 
   func retryHistoricalTransferAfterIdleIfNeeded(reason: String) -> Bool {
     guard !historicalManager.historicalRangePollOnly,
-          historicalManager.historicalPacketsReceivedThisSync == 0 else {
+          historicalManager.historicalPacketsReceivedThisSync == 0,
+          historicalManager.historicalTransferRequestAttemptCount > 0 else {
       return false
     }
-    if activeDeviceGeneration == .gen4 && historicalManager.historyCompleteReceived {
+    if historicalManager.historyCompleteReceived {
       record(
         source: "ble.sync",
-        title: "historical_sync.gen4.retry_skipped",
-        body: "history_complete=true"
+        title: "historical_sync.retry_skipped",
+        body: "history_complete=true packets=0 generation=\(activeDeviceGeneration.description)"
       )
-      completeHistoricalSync(reason: "gen4_history_complete_metadata_only")
+      completeHistoricalSync(reason: "history_complete_metadata_only")
       return true
     }
     guard historicalManager.historicalTransferRequestAttemptCount < historicalManager.historicalTransferMaxRequestAttempts else {
@@ -432,6 +433,7 @@ extension GooseBLEClient {
     historicalManager.historyStartReceived = false
     historicalManager.historyEndReceived = false
     historicalManager.historyCompleteReceived = false
+    historicalManager.historicalRangePageState = nil
     historicalManager.historyEndAckQueued = false
     historicalManager.historyEndAckSentThisBurst = false
     historicalManager.pendingHistoryEndAckPayload = nil

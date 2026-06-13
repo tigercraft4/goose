@@ -29,6 +29,7 @@ final class GooseBLEHistoricalManager {
   var historicalRangePendingResponses = 0
   var historicalRangeRetryCount = 0
   var historicalTransferRequestAttemptCount = 0
+  var historicalRangePageState: GooseBLEClient.HistoricalRangePageState?
 
   // MARK: - Ack and metadata flags
 
@@ -60,6 +61,10 @@ final class GooseBLEHistoricalManager {
   let historicalRangeRetryDelay: TimeInterval = 1
   let historicalRangeMaxRetries = 2
   let historicalTransferMaxRequestAttempts = 3
+  // Straggler window after a transfer command or history metadata. Empty syncs
+  // complete from an explicit GET_DATA_RANGE pagesBehind == 0 response, not
+  // from a shorter silence heuristic.
+  let historicalIdleCompletionTimeout: TimeInterval = 12
 
   // MARK: - Callbacks
   // All mutation methods and callbacks must be called on the main thread.
