@@ -4149,7 +4149,7 @@ fn heart_rate_plan_from_row(row: &DecodedFrameRow) -> GooseResult<Option<HeartRa
             body_summary_kind: "v18_history",
             source_signal: "v18_history_hr",
             quality_flag: "preliminary_v18_history_hr",
-            marker_offset: 22, // data[22] = payload[25] in V18 body
+            marker_offset: 27, // data[27] = payload[30] in V18 body (HR source byte)
             marker_value: v18_hr,
             device_timestamp_seconds: timestamp_seconds,
             device_timestamp_subseconds: timestamp_subseconds,

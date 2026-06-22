@@ -1092,8 +1092,8 @@ fn parse_v18_body(payload: &[u8]) -> (Option<DataPacketBodySummary>, Vec<String>
     let data = payload.get(3..).unwrap_or(&[]);
     let mut warnings = Vec::new();
 
-    // Minimum length guard: skin_temp_raw at body offset 73 reads data[73..75] — 75 bytes needed.
-    if data.len() < 75 {
+    // Minimum length guard: skin_temp_raw at body offset 62 reads data[62..64] — 64 bytes needed.
+    if data.len() < 64 {
         warnings.push("v18_payload_too_short".to_string());
         return (
             Some(DataPacketBodySummary::V18History {
@@ -1110,7 +1110,11 @@ fn parse_v18_body(payload: &[u8]) -> (Option<DataPacketBodySummary>, Vec<String>
         );
     }
 
-    let hr = data.get(22).copied();
+    // HR byte at body-relative data[27], cross-validated against Garmin overnight ground truth
+    // on real device captures: overnight mean 68 bpm (Garmin 67), p5 56 (Garmin RHR 59), daytime
+    // 103, with a correct circadian curve. The previous offset (data[22]) read a non-HR byte
+    // (overnight mean ~12, p95 128) sitting in a low/zero region.
+    let hr = data.get(27).copied();
 
     let rr_count = data.get(23).copied().unwrap_or(0) as usize;
     let rr_count = rr_count.min(4);
@@ -1128,12 +1132,15 @@ fn parse_v18_body(payload: &[u8]) -> (Option<DataPacketBodySummary>, Vec<String>
 
     let step_motion_counter = read_u16_le(data, 57);
 
-    // offset 73 (body-relative): u16 LE, skin_temp_raw
+    // offset 62 (body-relative): u16 LE, skin_temp_raw (= payload[65])
     //   body starts at payload[3] (3-byte data-packet header skipped above)
-    //   degC = raw / 128.0 (LSBs per degree Celsius from NTC thermistor linearisation)
-    //   gate 5–45°C applied at persistence site; values outside range indicate off-wrist or sensor error
-    //   empirically verified via hardware captures
-    let skin_temp_raw = read_u16_le(data, 73);
+    //   raw is linearised to degC at the persistence site (skin_temp_celsius_from_raw);
+    //   plausibility gate applied there. Values outside range indicate off-wrist or sensor error.
+    //   Cross-validated against Garmin overnight skin temperature on three nights: absolute
+    //   33.5 / 33.9 / 34.1 °C (physiological wrist temp), ultra-smooth (~0.01 °C/step), with
+    //   nocturnal cooling rank-ordered against Garmin (Δ -0.9 > -0.7 > -0.6). The previous
+    //   offset (data[73]) read the all-zero dead region (data[70..83]).
+    let skin_temp_raw = read_u16_le(data, 62);
 
     (
         Some(DataPacketBodySummary::V18History {

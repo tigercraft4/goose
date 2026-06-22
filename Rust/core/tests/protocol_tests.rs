@@ -698,20 +698,20 @@ fn parses_v18_historical_body_fields() {
     payload[0] = u8::from(PacketType::HistoricalData);
     payload[1] = 18;
     payload[2] = 1;
-    // HR at body offset 22 = payload[25]
-    payload[3 + 22] = 75;
-    // rr_count at body offset 23 = payload[26]; set 2 RR intervals
-    payload[3 + 23] = 2;
+    // rr_count at body offset 23 = payload[26]; set 1 RR interval (offsets 24..26)
+    payload[3 + 23] = 1;
     put_u16(&mut payload, 3 + 24, 900); // first RR interval 900ms
-    put_u16(&mut payload, 3 + 26, 950); // second RR interval 950ms
+    // HR at body offset 27 = payload[30]; written after the RR bytes so the
+    // synthetic layout stays distinct (RR interval occupies offsets 24..26).
+    payload[3 + 27] = 75;
     // gravity_x/y/z at body offsets 45/49/53
     put_f32(&mut payload, 3 + 45, 0.1_f32);
     put_f32(&mut payload, 3 + 49, 0.2_f32);
     put_f32(&mut payload, 3 + 53, 9.8_f32);
     // step_motion_counter at body offset 57
     put_u16(&mut payload, 3 + 57, 42);
-    // skin_temp_raw at body offset 73: raw 4096 → 4096/128.0 = 32.0°C (within gate)
-    put_u16(&mut payload, 3 + 73, 4096);
+    // skin_temp_raw at body offset 62 (= payload[65]): raw u16 LE, linearised to degC downstream
+    put_u16(&mut payload, 3 + 62, 4096);
 
     let frame = build_v5_payload_frame(&payload);
     let parsed = parse_frame(DeviceType::Goose, &frame).unwrap();
@@ -739,9 +739,8 @@ fn parses_v18_historical_body_fields() {
                     warnings,
                 } => {
                     assert_eq!(hr, Some(75));
-                    assert_eq!(rr_intervals_ms.len(), 2);
+                    assert_eq!(rr_intervals_ms.len(), 1);
                     assert_eq!(rr_intervals_ms[0], 900);
-                    assert_eq!(rr_intervals_ms[1], 950);
                     assert!(gravity_x.is_some());
                     assert!(gravity_y.is_some());
                     assert!(gravity_z.is_some());
@@ -758,7 +757,7 @@ fn parses_v18_historical_body_fields() {
 
 #[test]
 fn v18_too_short_yields_warning() {
-    // payload shorter than 75 body bytes → v18_payload_too_short, all fields None
+    // payload shorter than 64 body bytes → v18_payload_too_short, all fields None
     let mut payload = vec![0u8; 20];
     payload[0] = u8::from(PacketType::HistoricalData);
     payload[1] = 18;

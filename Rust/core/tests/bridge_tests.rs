@@ -7778,7 +7778,7 @@ fn bridge_exports_raw_timeframe_for_debug_export_flow() {
     assert_eq!(result["raw_rows"], 8);
     assert_eq!(result["decoded_frame_rows"], 8);
     assert_eq!(result["packet_timeline_rows"], 8);
-    assert_eq!(result["sensor_sample_rows"], 18); // V18 extracts HR from data[22], fixture k18 frame HR byte differs from NormalHistory marker at [14]
+    assert_eq!(result["sensor_sample_rows"], 18); // V18 extracts HR from data[27], fixture k18 frame HR byte differs from NormalHistory marker at [14]
     assert_eq!(result["metric_feature_report_rows"], 7);
     assert_eq!(result["metric_value_rows"], 0);
     assert_eq!(result["metric_component_rows"], 0);
@@ -9037,10 +9037,10 @@ fn historical_k18_frame_hex(marker_value: u8) -> String {
         0xee,
         0xff,
     ];
-    // V18History needs ≥78 bytes (3-byte header + 75-byte body for skin_temp at data[73]).
-    // HR is at data[22] = payload[25]. Resize first, then set the HR byte.
+    // V18History needs ≥67 bytes (3-byte header + 64-byte body for skin_temp at data[62]).
+    // HR is at data[27] = payload[30]. Resize first, then set the HR byte.
     payload.resize(80, 0);
-    payload[25] = marker_value; // V18 HR at data[22]
+    payload[30] = marker_value; // V18 HR at data[27]
     hex::encode(build_v5_payload_frame(&payload))
 }
 
@@ -9090,10 +9090,10 @@ fn historical_k18_frame_hex_with_vital_candidates(
         0xee,
         0xff,
     ];
-    // Extend to 80 bytes for valid V18 parsing; HR at data[22]=payload[25].
+    // Extend to 80 bytes for valid V18 parsing; HR at data[27]=payload[30].
     // Temp and resp rate at absolute offsets 37/39 (same as before).
     payload.resize(80, 0);
-    payload[25] = marker_value; // V18 HR at data[22]
+    payload[30] = marker_value; // V18 HR at data[27]
     put_i16(&mut payload, 37, temperature_centi_c);
     put_u16(&mut payload, 39, respiratory_rate_tenths_rpm);
     hex::encode(build_v5_payload_frame(&payload))
