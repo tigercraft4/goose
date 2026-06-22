@@ -1,5 +1,5 @@
 # Test-only dependencies (NOT installed in the production image). The runtime image
 # uses requirements.txt; tests additionally need pytest + httpx (FastAPI TestClient).
 -r requirements.txt
-pytest>=9.0.3
+pytest>=9.1.0
 httpx>=0.28.1
