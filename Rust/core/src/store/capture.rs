@@ -1055,6 +1055,26 @@ impl GooseStore {
         Ok(rows)
     }
 
+    /// Test-only seam to insert a single row directly into the rr_intervals table.
+    /// In production this table is populated solely by backfill from the proprietary
+    /// V24 decode (see backfill_streams_from_decoded_frames above); tests use this to
+    /// stage the untrusted-source scenario without driving the full decode path.
+    #[cfg(test)]
+    pub fn insert_rr_interval_for_test(
+        &self,
+        device_id: &str,
+        ts: f64,
+        interval_ms: i64,
+    ) -> GooseResult<()> {
+        self.immediate_transaction(|conn| {
+            conn.execute(
+                "INSERT OR IGNORE INTO rr_intervals (device_id, ts, interval_ms) VALUES (?1, ?2, ?3)",
+                params![device_id, ts, interval_ms],
+            )?;
+            Ok(())
+        })
+    }
+
     /// Delete synced rows (synced=1) older than older_than_ts from a stream table.
     /// Stream table pruning only removes rows with synced=1 — unsynced rows (synced=0)
     /// are structurally protected regardless of age. Same allowlist as mark_synced_rows.

@@ -1760,9 +1760,18 @@ fn hrv_report_from_rr_table(
         end_time: end.to_string(),
         candidate_frame_count: rows.len(),
         feature_count: if hrv_input.is_some() { 1 } else { 0 },
-        trusted_feature_count: if hrv_input.is_some() { 1 } else { 0 },
+        // The rr_intervals table is populated ONLY from the reverse-engineered,
+        // proprietary WHOOP V24 decode (store/capture.rs, V24History.rr_intervals_ms),
+        // whose millisecond scale is unverified (see the hrv_rr_interval_scale_unverified /
+        // rr_interval_scale_unvalidated flags). That source has no trust chain, so the
+        // candidate value produced here is NOT trusted. Mirroring how run_hrv_feature_report
+        // computes trust (features.filter(|f| f.trusted_metric_input).count()), this fallback
+        // path has zero trusted features and zero trusted RR intervals. The candidate is still
+        // surfaced via hrv_input / score_result / feature_count / rr_interval_count for display
+        // and the simulator; only its TRUST labeling is corrected here.
+        trusted_feature_count: 0,
         rr_interval_count: rr_ms.len(),
-        trusted_rr_interval_count: rr_ms.len(),
+        trusted_rr_interval_count: 0,
         min_rr_intervals_to_compute: options.min_rr_intervals_to_compute,
         require_baseline: options.require_baseline,
         baseline_min_days: options.baseline_min_days,
@@ -2430,11 +2439,22 @@ pub fn run_recovery_feature_score_report_for_store(
         issues.push("prior_strain_report_not_passed".to_string());
     }
 
-    let hrv_rmssd_ms = hrv_report
-        .score_result
-        .as_ref()
-        .and_then(|result| result.output.as_ref())
-        .map(|output| output.rmssd_ms);
+    // The recovery score must only consume TRUSTED HRV. The candidate rmssd may be
+    // populated from the unverified-scale proprietary V24 rr_intervals fallback
+    // (see hrv_report_from_rr_table), which carries no trust chain and reports
+    // trusted_feature_count == 0. Gate the score input on trust so untrusted
+    // candidates fall through to the existing hrv_rmssd_missing / recovery-unavailable
+    // path below. This is flag-independent: production calls with
+    // require_trusted_evidence == false, so a flag-based gate would be a no-op here.
+    let hrv_rmssd_ms = if hrv_report.trusted_feature_count > 0 {
+        hrv_report
+            .score_result
+            .as_ref()
+            .and_then(|result| result.output.as_ref())
+            .map(|output| output.rmssd_ms)
+    } else {
+        None
+    };
     let hrv_baseline_rmssd_ms = hrv_baseline_report
         .baseline
         .as_ref()
@@ -6752,4 +6772,133 @@ fn civil_from_days(days: i64) -> (i32, u32, u32) {
 
 fn clamp_fraction(value: f64) -> f64 {
     value.clamp(0.0, 1.0)
+}
+
+#[cfg(test)]
+mod hrv_trust_gate_tests {
+    use super::*;
+    use crate::store::GooseStore;
+
+    const HRV_START: &str = "2026-05-28T00:00:00Z";
+    const HRV_END: &str = "2026-05-28T12:00:00Z";
+
+    // Seed the rr_intervals table with `count` plausible RR intervals (alternating
+    // 800/825 ms) timestamped inside [HRV_START, HRV_END). This mirrors the ONLY
+    // production source for that table: the reverse-engineered, unverified-scale
+    // proprietary V24 decode. It deliberately does NOT touch decoded_frames, so the
+    // standard (trusted) HRV path finds nothing and the rr_intervals fallback engages.
+    fn seed_untrusted_rr_table(store: &GooseStore, count: usize) {
+        let base_ts = iso8601_to_unix_approx(HRV_START).expect("parse start");
+        for i in 0..count {
+            let interval_ms = if i % 2 == 0 { 800 } else { 825 };
+            // Spread one row per second so each lands inside the window.
+            store
+                .insert_rr_interval_for_test("device-untrusted", base_ts + i as f64, interval_ms)
+                .expect("insert rr interval");
+        }
+    }
+
+    fn recovery_options_production() -> RecoveryFeatureScoreOptions {
+        RecoveryFeatureScoreOptions {
+            // Production semantics: HealthDataStore+Snapshots.swift passes
+            // requireTrustedEvidence: false. The trust gate must hold regardless.
+            require_trusted_evidence: false,
+            hrv_min_rr_intervals_to_compute: 2,
+            ..RecoveryFeatureScoreOptions::default()
+        }
+    }
+
+    // (a) When the ONLY HRV source is the unverified-scale rr_intervals table, the
+    // recovery score must NOT be produced from it: hrv_rmssd is missing and there is
+    // no score_result. This proves the untrusted proprietary RR no longer drives
+    // recovery, under production (require_trusted_evidence == false) semantics.
+    #[test]
+    fn recovery_score_ignores_untrusted_rr_table_hrv() {
+        let store = GooseStore::open_in_memory().expect("open store");
+        seed_untrusted_rr_table(&store, 20);
+
+        let report = run_recovery_feature_score_report_for_store(
+            &store,
+            "test-db",
+            HRV_START,
+            HRV_END,
+            HRV_START,
+            HRV_END,
+            HRV_START,
+            HRV_END,
+            HRV_START,
+            HRV_END,
+            HRV_START,
+            HRV_END,
+            HRV_START,
+            HRV_END,
+            recovery_options_production(),
+        )
+        .expect("recovery report");
+
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|issue| issue == "hrv_rmssd_missing"),
+            "expected hrv_rmssd_missing, issues = {:?}",
+            report.issues
+        );
+        assert!(
+            report.score_result.is_none(),
+            "untrusted rr-table HRV must not yield a recovery score"
+        );
+        assert!(
+            report.recovery_input.is_none(),
+            "untrusted rr-table HRV must not yield a recovery input"
+        );
+    }
+
+    // (b) The standalone HRV feature report STILL surfaces the candidate (hrv_input
+    // and score_result populated, so display/simulator keep working), but it is
+    // correctly labeled untrusted: trusted_feature_count == 0 and
+    // trusted_rr_interval_count == 0.
+    #[test]
+    fn standalone_hrv_report_surfaces_untrusted_rr_table_candidate() {
+        let store = GooseStore::open_in_memory().expect("open store");
+        seed_untrusted_rr_table(&store, 20);
+
+        let report = run_hrv_feature_report_for_store(
+            &store,
+            "test-db",
+            HRV_START,
+            HRV_END,
+            HrvFeatureOptions {
+                require_trusted_evidence: false,
+                min_rr_intervals_to_compute: 2,
+                ..HrvFeatureOptions::default()
+            },
+        )
+        .expect("hrv report");
+
+        // Candidate preserved for display.
+        assert!(
+            report.hrv_input.is_some(),
+            "candidate hrv_input should be preserved for display"
+        );
+        assert!(
+            report.score_result.is_some(),
+            "candidate score_result should be preserved for display"
+        );
+        assert!(report.feature_count > 0, "feature_count should be nonzero");
+        assert!(
+            report.rr_interval_count > 0,
+            "rr_interval_count should be nonzero"
+        );
+
+        // But correctly labeled untrusted.
+        assert_eq!(
+            report.trusted_feature_count, 0,
+            "rr_intervals-table HRV must not be labeled trusted"
+        );
+        assert_eq!(
+            report.trusted_rr_interval_count, 0,
+            "rr_intervals-table RR must not be labeled trusted"
+        );
+    }
 }
