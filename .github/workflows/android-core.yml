@@ -57,7 +57,7 @@ jobs:
         run: cargo install cargo-ndk
 
       - name: Set up Android NDK
-        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
         with:
           packages: "ndk;28.2.13676358 platforms;android-36 build-tools;36.0.0"
 
