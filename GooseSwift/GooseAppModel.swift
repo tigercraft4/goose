@@ -351,8 +351,8 @@ final class GooseAppModel {
     refreshActivityTimeline()
     scheduleAutoStartHealthPacketCaptureIfNeeded()
     scheduleAutoStartRespiratoryPacketWatchIfNeeded()
-    // FIX-05 (D-09a): trigger storage compaction at launch from a background queue (Pitfall 6).
-    DispatchQueue.global(qos: .utility).async { [weak self] in
+    // Keep storage maintenance out of iOS's watchdog-sensitive scene creation window.
+    rustStartupQueue.asyncAfter(deadline: .now() + .seconds(30)) { [weak self] in
       self?.runStorageCompactionIfNeeded()
     }
   }
@@ -372,7 +372,7 @@ final class GooseAppModel {
   }
 
   private nonisolated func runStorageCompactionIfNeeded() {
-    // nonisolated: called from DispatchQueue.global background queue (Pitfall 6).
+    // nonisolated: called from a background queue after the first launch window.
     // Uses a local GooseRustBridge() — the Rust side is stateless across instances.
     let localRust = GooseRustBridge()
     let report: [String: Any]

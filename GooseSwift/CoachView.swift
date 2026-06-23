@@ -4,7 +4,7 @@ struct CoachView: View {
   @Environment(GooseAppModel.self) private var model
   @EnvironmentObject private var router: AppRouter
   @Environment(HealthDataStore.self) private var healthStore
-  @State private var registry = CoachProviderRegistry()
+  @State private var registry: CoachProviderRegistry
   @State private var chat: CoachChatModel
   @State private var promptDraft = ""
   @State private var appliedCoachPromptRequestID = 0

@@ -1,4 +1,4 @@
-use rusqlite::{OptionalExtension, params, params_from_iter};
+use rusqlite::{Connection, OptionalExtension, params, params_from_iter};
 
 use crate::{
     GooseError, GooseResult,
@@ -662,6 +662,10 @@ impl GooseStore {
             .conn
             .lock()
             .map_err(|_| GooseError::message("store mutex poisoned"))?;
+        Self::raw_evidence_payload_bytes_with_conn(&conn)
+    }
+
+    fn raw_evidence_payload_bytes_with_conn(conn: &Connection) -> GooseResult<i64> {
         Ok(conn.query_row(
             r#"
             SELECT COALESCE(SUM(LENGTH(payload_hex) / 2), 0)
@@ -677,12 +681,12 @@ impl GooseStore {
         &self,
         limit_bytes: i64,
     ) -> GooseResult<RawEvidencePayloadRetentionReport> {
+        validate_non_negative("limit_bytes", limit_bytes)?;
         let conn = self
             .conn
             .lock()
             .map_err(|_| GooseError::message("store mutex poisoned"))?;
-        validate_non_negative("limit_bytes", limit_bytes)?;
-        let before_bytes = self.raw_evidence_payload_bytes()?;
+        let before_bytes = Self::raw_evidence_payload_bytes_with_conn(&conn)?;
         if before_bytes <= limit_bytes {
             return Ok(RawEvidencePayloadRetentionReport {
                 limit_bytes,
@@ -694,27 +698,30 @@ impl GooseStore {
         }
 
         let mut bytes_to_free = before_bytes - limit_bytes;
-        let mut statement = conn.prepare(
-            r#"
-            SELECT evidence_id, LENGTH(payload_hex) / 2
-            FROM raw_evidence
-            WHERE payload_hex != ''
-            ORDER BY captured_at, evidence_id
-            "#,
-        )?;
-        let rows = statement.query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
-        })?;
+        let compacted_ids = {
+            let mut statement = conn.prepare(
+                r#"
+                SELECT evidence_id, LENGTH(payload_hex) / 2
+                FROM raw_evidence
+                WHERE payload_hex != ''
+                ORDER BY captured_at, evidence_id
+                "#,
+            )?;
+            let rows = statement.query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
+            })?;
 
-        let mut compacted_ids = Vec::new();
-        for row in rows {
-            let (evidence_id, payload_bytes) = row?;
-            if bytes_to_free <= 0 {
-                break;
+            let mut compacted_ids = Vec::new();
+            for row in rows {
+                let (evidence_id, payload_bytes) = row?;
+                if bytes_to_free <= 0 {
+                    break;
+                }
+                bytes_to_free -= payload_bytes;
+                compacted_ids.push(evidence_id);
             }
-            bytes_to_free -= payload_bytes;
-            compacted_ids.push(evidence_id);
-        }
+            compacted_ids
+        };
 
         let mut compacted_rows = 0;
         for evidence_id in compacted_ids {
@@ -724,7 +731,7 @@ impl GooseStore {
             )? as i64;
         }
 
-        let after_bytes = self.raw_evidence_payload_bytes()?;
+        let after_bytes = Self::raw_evidence_payload_bytes_with_conn(&conn)?;
         Ok(RawEvidencePayloadRetentionReport {
             limit_bytes,
             before_bytes,

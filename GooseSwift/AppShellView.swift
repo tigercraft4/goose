@@ -5,6 +5,7 @@ struct AppShellView: View {
   @Environment(GooseAppModel.self) private var model
   @State private var homeHealthPath: [HealthRoute] = []
   @State private var homeSelectedDate = Date()
+  @State private var hasLoadedCoach = false
 
   var body: some View {
     TabView(selection: tabSelection) {
@@ -16,12 +17,20 @@ struct AppShellView: View {
         .tag(tab)
       }
     }
+    .onChange(of: router.selectedTab) { _, newTab in
+      if newTab == .coach {
+        hasLoadedCoach = true
+      }
+    }
   }
 
   private var tabSelection: Binding<GooseAppTab> {
     Binding {
       router.selectedTab
     } set: { newTab in
+      if newTab == .coach {
+        hasLoadedCoach = true
+      }
       if newTab == router.selectedTab {
         router.reselect(newTab)
         return
@@ -65,7 +74,15 @@ struct AppShellView: View {
     case .health:
       HealthView()
     case .coach:
-      CoachView()
+      if hasLoadedCoach || router.selectedTab == .coach {
+        CoachView()
+          .onAppear {
+            hasLoadedCoach = true
+          }
+      } else {
+        Color.clear
+          .accessibilityHidden(true)
+      }
     case .more:
       MoreView()
     }
