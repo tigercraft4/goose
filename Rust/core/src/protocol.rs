@@ -1177,7 +1177,7 @@ fn parse_v26_ppg_body(payload: &[u8]) -> (Option<DataPacketBodySummary>, Vec<Str
     // hardware-verified on WHOOP 5.0 type-47 v26; values outside 1–26 indicate a firmware
     // variant or parse misalignment and must not propagate as valid optical channel data.
     let ppg_channel = data[9];
-    if ppg_channel < 1 || ppg_channel > 26 {
+    if !(1..=26).contains(&ppg_channel) {
         warnings.push(format!("ppg_channel_out_of_range_{ppg_channel}"));
         return (
             Some(DataPacketBodySummary::Unknown { packet_k: 26 }),
