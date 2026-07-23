@@ -4,6 +4,10 @@
 >
 > See [DISCLAIMER.md](DISCLAIMER.md) for the full legal statement.
 
+> **Project archived — July 23, 2026**
+>
+> Goose is no longer under active development. I am moving my time and support to [ryanbr/noop](https://github.com/ryanbr/noop), which is an active offline WHOOP companion project. I do not have enough time to maintain Goose as a full-time project, so future support, fixes, and community effort should happen there instead.
+
 <p align="center">
   <img src="docs/assets/readme-hero.png" alt="Goose" width="560">
 </p>
@@ -12,7 +16,7 @@
 
 <p align="center"><b>Your strap. Your data. Your phone. BLE-direct, self-hosted, no cloud.</b></p>
 
-<p align="center"><sub>Active fork of <a href="https://github.com/b-nnett/goose">b-nnett/goose</a> — expanded with a Rust metrics core, self-hosted server, and full health dashboard.</sub></p>
+<p align="center"><sub>Archived fork of <a href="https://github.com/b-nnett/goose">b-nnett/goose</a> — future support is moving to <a href="https://github.com/ryanbr/noop">ryanbr/noop</a>.</sub></p>
 
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-iOS%2026%2B-007AFF?style=flat-square">
@@ -172,7 +176,7 @@ Can't donate? **⭐ star the repo**, file a bug report, or share a strap log. Th
 
 ## Contributing
 
-Small, focused changes are easiest to review. See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, Rust bridge conventions, and the PR checklist. Join [Discord](https://discord.gg/EyZE6gzAF2) or [GitHub Discussions](https://github.com/tigercraft4/goose/discussions) for questions.
+This repository is archived and is not accepting new feature work. Please direct future bug reports, support requests, and community development to [ryanbr/noop](https://github.com/ryanbr/noop). Existing code and documentation remain available for reference.
 
 ## License
 
