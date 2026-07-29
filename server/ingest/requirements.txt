@@ -4,7 +4,7 @@ psycopg[binary]==3.3.4
 zstandard==0.25.0
 # --- metrics-accuracy overhaul (2026-05-26): vetted signal/HRV/stats libraries ---
 neurokit2==0.2.13
-numpy==2.4.6
+numpy==2.5.1
 scipy==1.17.1
 scikit-learn==1.9.0
 pandas==2.3.3
